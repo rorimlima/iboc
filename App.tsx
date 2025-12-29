@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { PublicLayout } from './components/public/PublicLayout';
 import { Home } from './components/public/Home';
-import { SocialPage } from './components/public/SocialPage'; // New Page
+import { SocialPage } from './components/public/SocialPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminDashboard } from './components/admin/Dashboard';
 import { AdminMembers } from './components/admin/Members';
@@ -9,14 +10,15 @@ import { AdminFinance } from './components/admin/Finance';
 import { AdminSiteContent } from './components/admin/SiteContent';
 import { AdminEvents } from './components/admin/Events';
 import { AdminResources } from './components/admin/Resources'; 
-import { AdminSocialProjects } from './components/admin/SocialProjects'; // New Admin
-import { PageView, SiteContent, Member, AppUser } from './types';
+import { AdminSocialProjects } from './components/admin/SocialProjects';
+import { PageView, SiteContent, AppUser } from './types';
 import { INITIAL_SITE_CONTENT } from './data';
 import { Button } from './components/ui/Button';
-import { signOut, User as FirebaseUser, signInAnonymously } from 'firebase/auth';
+import { signOut, signInAnonymously } from 'firebase/auth';
 import { auth, db } from './firebaseConfig';
 import { Loader2, Quote } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { getSiteContent } from './services/firestore';
 
 const About = () => (
   <div className="py-20 bg-stone-50 min-h-[60vh]">
@@ -111,7 +113,6 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
   const [currentVerse, setCurrentVerse] = useState(LOGIN_VERSES[0]);
 
   useEffect(() => {
-    // Select random verse on mount
     const randomIndex = Math.floor(Math.random() * LOGIN_VERSES.length);
     setCurrentVerse(LOGIN_VERSES[randomIndex]);
   }, []);
@@ -124,9 +125,7 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
     try {
       await signInAnonymously(auth);
     } catch (e: any) {
-      if (e.code !== 'auth/configuration-not-found') {
-         console.warn("Aviso de Auth:", e.code);
-      }
+         console.warn("Auth warning:", e.code);
     }
     
     if (username === 'rorim' && password === '1234') {
@@ -181,30 +180,22 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
 
   return (
     <div className="min-h-screen flex bg-white">
-      
-      {/* Left Side - Image & Verse */}
       <div className="hidden lg:flex lg:w-[55%] relative bg-navy-900 items-center justify-center overflow-hidden">
-         {/* Background Image: Man/Path/Cross/Sunset */}
          <img 
             src="https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=2071&auto=format&fit=crop" 
             className="absolute inset-0 w-full h-full object-cover opacity-80"
-            alt="Caminho para a cruz"
+            alt="Caminho"
          />
-         {/* Overlays for readability and elegance */}
          <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/40 to-navy-900/30 mix-blend-multiply" />
-         <div className="absolute inset-0 bg-gold-900/10 mix-blend-overlay" />
-
          <div className="relative z-10 p-16 max-w-2xl text-center">
             <div className="mb-8 opacity-80 flex justify-center">
                 <div className="p-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm">
                     <Quote size={32} className="text-gold-400 fill-current" />
                 </div>
             </div>
-            
             <h2 className="text-3xl md:text-5xl font-serif text-white italic leading-tight drop-shadow-lg mb-8">
                 "{currentVerse.text}"
             </h2>
-            
             <div className="inline-flex items-center justify-center gap-4">
                  <div className="h-[1px] w-12 bg-gold-500/60"></div>
                  <p className="text-gold-400 font-sans tracking-[0.2em] uppercase font-semibold text-sm">
@@ -213,23 +204,9 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
                  <div className="h-[1px] w-12 bg-gold-500/60"></div>
             </div>
          </div>
-         
-         <div className="absolute bottom-8 left-0 w-full text-center text-white/30 text-xs uppercase tracking-widest">
-            Igreja Batista O Caminho
-         </div>
       </div>
 
-      {/* Right Side - Form */}
       <div className="w-full lg:w-[45%] flex items-center justify-center bg-stone-50 relative">
-         {/* Mobile Background (Shown only on small screens) */}
-         <div className="absolute inset-0 lg:hidden z-0">
-             <img 
-                src="https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=2071&auto=format&fit=crop" 
-                className="w-full h-full object-cover"
-             />
-             <div className="absolute inset-0 bg-navy-900/90" />
-         </div>
-
          <div className="max-w-md w-full p-8 md:p-12 relative z-10">
             <div className="bg-white/90 backdrop-blur-xl lg:bg-white rounded-2xl shadow-2xl p-8 lg:p-10 border border-white/50 lg:border-gray-100">
                 <div className="flex flex-col items-center mb-10">
@@ -246,11 +223,10 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
                     <input 
                     type="text" 
                     required
-                    className="w-full px-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy-900 focus:border-transparent outline-none bg-white text-gray-900 transition-all font-medium placeholder-gray-300" 
+                    className="w-full px-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy-900 focus:border-transparent outline-none bg-white text-gray-900 transition-all font-medium" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Identificação"
-                    autoComplete="username"
                     />
                 </div>
                 <div>
@@ -258,18 +234,15 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
                     <input 
                     type="password" 
                     required
-                    className="w-full px-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy-900 focus:border-transparent outline-none bg-white text-gray-900 transition-all font-medium placeholder-gray-300" 
+                    className="w-full px-4 py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy-900 focus:border-transparent outline-none bg-white text-gray-900 transition-all font-medium" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••"
-                    autoComplete="current-password"
                     />
                 </div>
-                
-                {error && <div className="text-red-500 text-xs text-center font-medium bg-red-50 p-3 rounded-lg border border-red-100 flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>{error}
+                {error && <div className="text-red-500 text-xs text-center font-medium bg-red-50 p-3 rounded-lg border border-red-100 animate-in fade-in">
+                    {error}
                 </div>}
-
                 <Button type="submit" disabled={loading} className="w-full shadow-glow py-4 mt-4 text-sm tracking-widest font-bold">
                     {loading ? <Loader2 className="animate-spin" size={20} /> : 'ENTRAR'}
                 </Button>
@@ -280,12 +253,6 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
                 </button>
                 </div>
             </div>
-            
-            {/* Mobile-only Verse display below form */}
-            <div className="lg:hidden mt-8 text-center text-white/80">
-                <p className="font-serif italic text-sm mb-2">"{currentVerse.text}"</p>
-                <p className="text-[10px] uppercase tracking-widest text-gold-500">{currentVerse.ref}</p>
-            </div>
          </div>
       </div>
     </div>
@@ -295,9 +262,25 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageView>(PageView.PUBLIC_HOME);
   const [user, setUser] = useState<AppUser | null>(null);
-  const [loadingInitial, setLoadingInitial] = useState(false);
-  
+  const [loadingInitial, setLoadingInitial] = useState(true);
   const [siteContent, setSiteContent] = useState<SiteContent>(INITIAL_SITE_CONTENT);
+
+  // BUSCA INICIAL: Sincroniza com o que está salvo no Firebase assim que abre o app
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const content = await getSiteContent();
+        if (content) {
+          setSiteContent(content);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configurações iniciais:", err);
+      } finally {
+        setLoadingInitial(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleLoginSuccess = (loggedInUser: AppUser) => {
     setUser(loggedInUser);
@@ -314,11 +297,16 @@ const App: React.FC = () => {
     PageView.PUBLIC_HOME, 
     PageView.PUBLIC_ABOUT, 
     PageView.PUBLIC_CONTACT,
-    PageView.PUBLIC_SOCIAL // Added
+    PageView.PUBLIC_SOCIAL
   ].includes(currentPage);
 
   if (loadingInitial) {
-    return <div className="min-h-screen flex items-center justify-center bg-stone-50"><Loader2 className="animate-spin text-navy-900" size={32} /></div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
+        <Loader2 className="animate-spin text-navy-900 mb-4" size={32} />
+        <p className="text-xs uppercase tracking-widest text-gray-400 font-bold">Iniciando IBOC Digital...</p>
+      </div>
+    );
   }
 
   if (currentPage === PageView.LOGIN) {

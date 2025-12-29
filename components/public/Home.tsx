@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/Button';
 import { RevealOnScroll } from '../ui/RevealOnScroll';
-import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, Users, ChevronRight, ChevronLeft, Heart, Image as ImageIcon } from 'lucide-react';
+import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight, ChevronLeft, Heart, Image as ImageIcon } from 'lucide-react';
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
 import { getCollection } from '../../services/firestore';
@@ -72,8 +72,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
   const scrollLeft = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' }); };
   const scrollRight = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' }); };
 
+  // DESTAQUE DINÂMICO: Usa estritamente o que a liderança configurou ou cai para o próximo da agenda
   const upcomingEvent = useMemo(() => {
-    if (content.nextEventTitle && content.nextEventDate) {
+    // Se a liderança preencheu o título do destaque no painel, ele é soberano
+    if (content.nextEventTitle && content.nextEventTitle !== "Conferência de Família" || content.nextEventBannerUrl) {
       return {
         id: 'featured-manual',
         title: content.nextEventTitle,
@@ -85,13 +87,16 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         type: 'Destaque'
       } as ChurchEvent;
     }
+    // Caso contrário, pega o primeiro da agenda automatizada
     return events.length > 0 ? events[0] : null;
   }, [content, events]);
 
   const carouselEvents = useMemo(() => {
-      if (content.nextEventTitle) return events;
+      // Se estamos com destaque manual, mostramos todos os da agenda no carrossel
+      if (upcomingEvent?.id === 'featured-manual') return events;
+      // Se o destaque é o primeiro da agenda, mostramos o resto
       return events.length > 1 ? events.slice(1) : [];
-  }, [content.nextEventTitle, events]);
+  }, [upcomingEvent, events]);
 
   return (
     <div className="flex flex-col w-full bg-stone-50">
