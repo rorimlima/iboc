@@ -169,16 +169,16 @@ export const SocialPage: React.FC = () => {
             )}
         </div>
 
-        {/* Lightbox Profissional */}
+        {/* Lightbox Profissional Aprimorado */}
         {selectedImage && (
             <div className="fixed inset-0 bg-navy-900/98 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-300">
-                {/* Controles do Topo */}
-                <div className="absolute top-0 w-full p-6 flex justify-between items-center z-10">
+                {/* Cabeçalho do Lightbox com Botão de Fechar Proeminente */}
+                <div className="fixed top-0 left-0 w-full p-6 flex justify-between items-start z-[110] bg-gradient-to-b from-navy-900/80 to-transparent">
                     <div className="text-white">
-                        <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-gold-500">Visualizando Projeto</span>
-                        <h4 className="text-xl font-serif">{selectedImage.projectTitle}</h4>
+                        <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-gold-500 block mb-1">Galeria Social</span>
+                        <h4 className="text-xl font-serif md:text-2xl">{selectedImage.projectTitle}</h4>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex items-center gap-3">
                         <button 
                             onClick={() => {
                                 if (navigator.share) {
@@ -189,42 +189,46 @@ export const SocialPage: React.FC = () => {
                                     });
                                 }
                             }}
-                            className="p-3 rounded-full bg-white/10 text-white hover:bg-gold-500 hover:text-navy-900 transition-all"
+                            className="p-3 rounded-full bg-white/10 text-white hover:bg-gold-500 hover:text-navy-900 transition-all border border-white/5 backdrop-blur-md"
                         >
                             <Share2 size={20} />
                         </button>
                         <button 
                             onClick={() => setSelectedImage(null)} 
-                            className="p-3 rounded-full bg-white/10 text-white hover:bg-red-500 transition-all"
+                            className="p-3 rounded-full bg-navy-900/50 text-white hover:bg-red-600 transition-all border border-white/20 backdrop-blur-xl group"
+                            aria-label="Fechar imagem"
                         >
-                            <X size={24}/>
+                            <X size={28} className="group-hover:rotate-90 transition-transform duration-300"/>
                         </button>
                     </div>
                 </div>
 
-                {/* Área da Imagem */}
+                {/* Área da Imagem Centralizada com Visualização Completa (object-contain) */}
                 <div className="w-full h-full flex items-center justify-center p-4 md:p-12 relative">
-                    <div className="relative max-w-6xl max-h-[75vh] group/light">
+                    <div className="relative w-full h-full max-w-7xl flex items-center justify-center group/light">
                         <img 
                             src={selectedImage.url} 
-                            className="w-full h-full object-contain shadow-2xl rounded-lg" 
+                            className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm md:rounded-lg animate-fade-in-up" 
                             alt="Visualização ampliada"
                         />
-                        <IBOCStamp light />
+                        <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 scale-125 opacity-100">
+                             <IBOCStamp light />
+                        </div>
                     </div>
                 </div>
 
-                {/* Rodapé do Lightbox com Versículo */}
+                {/* Rodapé do Lightbox com Versículo Bíblico */}
                 {selectedImage.verse && (
-                    <div className="w-full max-w-4xl px-8 pb-12 text-center animate-fade-in-up">
-                        <div className="w-12 h-px bg-gold-500 mx-auto mb-6"></div>
-                        <Quote size={24} className="text-gold-500 mx-auto mb-4 opacity-50" />
-                        <p className="text-white font-serif italic text-xl md:text-2xl leading-relaxed mb-4">
-                            "{selectedImage.verse}"
-                        </p>
-                        <span className="text-gold-500 text-xs font-bold uppercase tracking-[0.4em] block">
-                            {selectedImage.ref}
-                        </span>
+                    <div className="fixed bottom-0 left-0 w-full p-8 md:p-12 text-center z-[110] bg-gradient-to-t from-navy-900/90 to-transparent">
+                        <div className="max-w-4xl mx-auto animate-fade-in-up">
+                            <Quote size={24} className="text-gold-500/50 mx-auto mb-4" />
+                            <p className="text-white font-serif italic text-lg md:text-2xl leading-relaxed mb-3">
+                                "{selectedImage.verse}"
+                            </p>
+                            <span className="text-gold-500 text-xs md:text-sm font-bold uppercase tracking-[0.5em] block opacity-80">
+                                {selectedImage.ref}
+                            </span>
+                        </div>
                     </div>
                 )}
             </div>
