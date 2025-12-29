@@ -1,13 +1,8 @@
+
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, terminate } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-
-// --- IMPORTANTE ---
-// Para pegar esses dados:
-// 1. Vá em console.firebase.google.com
-// 2. Configurações do Projeto (Engrenagem) > Role até "Seus aplicativos"
-// 3. Selecione o app Web (</>) e copie o objeto "firebaseConfig"
 
 const firebaseConfig = {
   apiKey: "AIzaSyDZWuI1k8Of9aFgfHWS4_Kq17KhcdCQRZA",
@@ -20,6 +15,13 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+
+// initializeFirestore com experimentalForceLongPolling resolve o erro de "Could not reach backend"
+// em ambientes onde WebSockets são instáveis ou bloqueados.
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+  useFetchStreams: false
+});
+
 export const auth = getAuth(app);
 export const storage = getStorage(app);

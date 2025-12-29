@@ -17,7 +17,7 @@ export interface Member {
   receptionType?: 'Batismo' | 'Aclamação' | 'Transferência';
   status: 'Ativo' | 'Em Observação' | 'Ausente' | 'Transferido' | 'Falecido';
   previousChurch?: string;
-  role: 'Membro' | 'Liderança' | 'Diácono' | 'Pastor' | 'Professor EBD' | 'Porteiro' | 'Músico';
+  role: 'Membro' | 'Liderança' | 'Diácono' | 'Pastor' | 'Professor EBD' | 'Porteiro' | 'Músico' | 'Tesoureiro 1' | 'Tesoureiro 2' | 'Conselho Fiscal 1' | 'Conselho Fiscal 2' | 'Conselho Fiscal 3' | 'Secretaria 1' | 'Secretaria 2' | 'Superentendente';
   ministries?: string[];
   spiritualGifts?: string;
   lastAttendance?: string;
@@ -74,7 +74,7 @@ export interface ChurchEvent {
   description?: string;
   bannerUrl?: string;
   roster?: RosterItem[];
-  linkedProjectId?: string; // ID do Projeto Social vinculado
+  linkedProjectId?: string;
 }
 
 export interface Sermon {
@@ -97,7 +97,7 @@ export interface SocialProjectItem {
   imageUrl: string;
   verse: string;
   verseReference: string;
-  registeredAt: number; // Timestamp para ordenação cronológica
+  registeredAt: number;
 }
 
 export interface SocialProject {
@@ -109,8 +109,8 @@ export interface SocialProject {
   bannerUrl?: string;
   status: 'Planejamento' | 'Realizado';
   gallery: SocialProjectItem[];
-  showInCalendar?: boolean; // Se deve criar evento na agenda
-  linkedEventId?: string; // ID do evento gerado na coleção events
+  showInCalendar?: boolean;
+  linkedEventId?: string;
 }
 
 export interface Asset {

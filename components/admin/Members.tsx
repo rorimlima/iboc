@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Member, AppUser } from '../../types';
 import { Button } from '../ui/Button';
@@ -232,7 +233,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-10 space-y-12">
-              
               {/* Photo Upload Section */}
               <div className="flex flex-col items-center bg-stone-50/30 p-8 rounded-3xl border border-dashed border-stone-200">
                 <div className="relative group">
@@ -303,56 +303,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 </div>
               </div>
 
-              {/* Grid 2: Endereço Residencial */}
-              <div className="space-y-8">
-                <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
-                   <div className="p-2 bg-navy-50 rounded-lg text-navy-800"><MapPin size={20} /></div>
-                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Endereço & Localização</h4>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Logradouro (Rua, Avenida, Número)</label>
-                    <input className={inputClass} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="RUA EXEMPRO, 123" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Bairro</label>
-                    <input className={inputClass} value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} placeholder="BARROSO" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Cidade</label>
-                    <input className={inputClass} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Grid 3: Acesso ao Sistema - RESTAURADO */}
-              <div className="space-y-8 bg-gold-50/30 p-8 rounded-[2rem] border border-gold-100">
-                <div className="flex items-center gap-4 border-b border-gold-200/50 pb-4">
-                  <div className="p-2 bg-navy-900 rounded-lg text-gold-500 shadow-lg"><Lock size={20} /></div>
-                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Segurança & Acesso Digital</h4>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div>
-                    <label className={labelClass}>Usuário / Login</label>
-                    <input className={inputClass + " border-gold-200"} value={formData.username || ''} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="usuario.iboc" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Senha Secreta</label>
-                    <input type="password" className={inputClass + " border-gold-200"} value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Privilégios Administrativos</label>
-                    <select className={inputClass + " border-gold-200 font-bold"} value={formData.permissions || 'viewer'} onChange={e => setFormData({...formData, permissions: e.target.value as any})}>
-                      <option value="viewer">Membro (Acesso Público)</option>
-                      <option value="editor">Líder (Editor de Conteúdo)</option>
-                      <option value="admin">Gestor (Controle Total)</option>
-                    </select>
-                  </div>
-                </div>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center mt-4">Estas credenciais permitem o acesso à Área de Líderes do site.</p>
-              </div>
-
-              {/* Grid 4: Vida Eclesiástica */}
+              {/* Vida Eclesiástica */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
                    <div className="p-2 bg-gold-500 rounded-lg text-white shadow-lg"><Award size={20} /></div>
@@ -379,31 +330,15 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                       <option value="Professor EBD">Professor EBD</option>
                       <option value="Músico">Músico</option>
                       <option value="Porteiro">Porteiro</option>
+                      <option value="Tesoureiro 1">Tesoureiro 1</option>
+                      <option value="Tesoureiro 2">Tesoureiro 2</option>
+                      <option value="Conselho Fiscal 1">Conselho Fiscal 1</option>
+                      <option value="Conselho Fiscal 2">Conselho Fiscal 2</option>
+                      <option value="Conselho Fiscal 3">Conselho Fiscal 3</option>
+                      <option value="Secretaria 1">Secretaria 1</option>
+                      <option value="Secretaria 2">Secretaria 2</option>
+                      <option value="Superentendente">Superentendente</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Tipo de Recepção</label>
-                    <select className={inputClass} value={formData.receptionType} onChange={e => setFormData({...formData, receptionType: e.target.value as any})}>
-                      <option value="Batismo">Batismo</option>
-                      <option value="Transferência">Transferência</option>
-                      <option value="Aclamação">Aclamação</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Data de Recepção na IBOC</label>
-                    <input type="date" className={inputClass} value={formData.receptionDate} onChange={e => setFormData({...formData, receptionDate: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Data do Batismo nas Águas</label>
-                    <input type="date" className={inputClass} value={formData.baptismDate} onChange={e => setFormData({...formData, baptismDate: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Congregação de Origem</label>
-                    <input className={inputClass} value={formData.previousChurch} onChange={e => setFormData({...formData, previousChurch: e.target.value})} placeholder="NOME DA IGREJA ANTERIOR" />
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className={labelClass}>Dons Espirituais & Áreas de Talentos</label>
-                    <textarea className={inputClass + " h-32 resize-none shadow-inner border-gray-100"} value={formData.spiritualGifts} onChange={e => setFormData({...formData, spiritualGifts: e.target.value})} placeholder="Descreva os dons espirituais e habilidades que o membro deseja colocar à disposição do Reino..." />
                   </div>
                 </div>
               </div>
@@ -411,13 +346,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
 
             {/* Modal Actions */}
             <div className="p-10 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-6">
-              <button 
-                type="button" 
-                onClick={() => setShowModal(false)} 
-                className="px-12 py-4 rounded-2xl text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-white hover:text-navy-900 transition-all border border-transparent hover:border-gray-100"
-              >
-                Descartar
-              </button>
+              <button type="button" onClick={() => setShowModal(false)} className="px-12 py-4 rounded-2xl text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-white transition-all">Descartar</button>
               <Button onClick={handleSave} disabled={loading} className="px-20 py-4 rounded-2xl shadow-glow font-bold text-sm">
                 {loading ? <Loader2 className="animate-spin mr-3" size={20}/> : <CheckCircle2 size={20} className="mr-3"/>}
                 {editingId ? 'Confirmar Atualização' : 'Efetivar Cadastro'}
