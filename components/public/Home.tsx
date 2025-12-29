@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/Button';
 import { RevealOnScroll } from '../ui/RevealOnScroll';
-import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight, ChevronLeft, Heart, Image as ImageIcon } from 'lucide-react';
+import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight, ChevronLeft, Heart, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
 import { getCollection } from '../../services/firestore';
@@ -58,15 +58,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         console.error("Erro ao gerar link de calendário", e);
     }
   };
-
-  const dailyQuote = useMemo(() => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - start.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    return INSPIRATIONAL_QUOTES[dayOfYear % INSPIRATIONAL_QUOTES.length];
-  }, []);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollLeft = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' }); };
@@ -169,6 +160,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         </div>
       </div>
 
+      {/* Agenda Ministerial */}
       {upcomingEvent && (
           <section className="py-24 bg-stone-50 overflow-hidden">
              <div className="container mx-auto px-6">
@@ -264,7 +256,89 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                 )}
              </div>
           </section>
-       )}
+      )}
+
+      {/* Projetos Sociais (Reexibição) */}
+      {latestSocialProject && (
+        <section className="py-24 bg-stone-100 relative overflow-hidden">
+            {/* Elemento Decorativo de Fundo */}
+            <div className="absolute -right-20 top-0 opacity-5 pointer-events-none">
+                <Heart size={400} strokeWidth={0.5} className="text-navy-900" />
+            </div>
+
+            <div className="container mx-auto px-6">
+                <RevealOnScroll>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="relative group">
+                            <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl relative border-8 border-white">
+                                <img 
+                                    src={latestSocialProject.bannerUrl || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070"} 
+                                    alt={latestSocialProject.title}
+                                    className="w-full h-full object-cover transition-transform duration-[5s] group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-transparent to-transparent"></div>
+                                
+                                {latestSocialProject.gallery && latestSocialProject.gallery.length > 0 && (
+                                    <div className="absolute bottom-10 left-10 right-10 p-8 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 text-white">
+                                        <QuoteIcon className="text-gold-500 mb-4 opacity-50" size={24} />
+                                        <p className="font-serif italic text-xl md:text-2xl leading-relaxed mb-4">
+                                            "{latestSocialProject.gallery[0].verse}"
+                                        </p>
+                                        <span className="text-gold-400 text-[10px] font-bold tracking-[0.4em] uppercase">
+                                            {latestSocialProject.gallery[0].verseReference}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Badge flutuante */}
+                            <div className="absolute -top-6 -right-6 w-32 h-32 bg-gold-500 rounded-full flex flex-col items-center justify-center text-navy-900 shadow-glow rotate-12 group-hover:rotate-0 transition-transform duration-700">
+                                <Heart size={32} className="mb-1 fill-navy-900" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Ação Social</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8">
+                            <div>
+                                <span className="text-gold-600 font-sans font-bold tracking-[0.3em] uppercase text-xs">Amor em Evidência</span>
+                                <h2 className="text-4xl md:text-6xl font-serif text-navy-900 mt-4 leading-tight">
+                                    {latestSocialProject.title}
+                                </h2>
+                                <div className="w-20 h-1.5 bg-gold-500 mt-6"></div>
+                            </div>
+
+                            <p className="text-gray-600 text-lg md:text-xl font-light leading-relaxed italic">
+                                "{latestSocialProject.description}"
+                            </p>
+
+                            <div className="flex flex-col gap-6 pt-6">
+                                <div className="flex items-center gap-4 text-navy-900/60">
+                                    <MapPin size={20} className="text-gold-500" />
+                                    <span className="text-sm font-medium uppercase tracking-widest">{latestSocialProject.location || 'Comunidade Local'}</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-navy-900/60">
+                                    <ImageIcon size={20} className="text-gold-500" />
+                                    <span className="text-sm font-medium uppercase tracking-widest">{latestSocialProject.gallery?.length || 0} Registros Fotográficos</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-10">
+                                <Button 
+                                    size="lg" 
+                                    variant="primary" 
+                                    onClick={() => onNavigate(PageView.PUBLIC_SOCIAL)}
+                                    className="px-12 py-5 rounded-2xl group"
+                                >
+                                    Ver Galeria de Impacto
+                                    <ArrowRight className="ml-3 group-hover:translate-x-2 transition-transform" size={20} />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </RevealOnScroll>
+            </div>
+        </section>
+      )}
     </div>
   );
 };
