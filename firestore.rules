@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // --- MODO DE DESENVOLVIMENTO (TEST MODE) ---
+    // Permite leitura e escrita para qualquer usuário (autenticado ou não).
+    // IMPORTANTE: Altere isso para regras seguras antes de lançar o app em produção.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
