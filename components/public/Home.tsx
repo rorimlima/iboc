@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/Button';
 import { RevealOnScroll } from '../ui/RevealOnScroll';
@@ -19,7 +20,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
     const fetchData = async () => {
         const eventsData = await getCollection<ChurchEvent>('events');
         const now = new Date();
-        const futureEvents = eventsData.filter(e => new Date(e.end) >= now);
+        const futureEvents = eventsData.filter(e => {
+            if (!e.start) return false;
+            return new Date(e.end || e.start) >= now;
+        });
         futureEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
         setEvents(futureEvents);
 
@@ -39,15 +43,20 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
   };
 
   const handleAddToCalendar = (event: ChurchEvent) => {
-    const startDateTime = new Date(event.start).toISOString().replace(/-|:|\.\d\d\d/g, "");
-    const endDateTime = new Date(event.end).toISOString().replace(/-|:|\.\d\d\d/g, "");
-    const url = new URL('https://calendar.google.com/calendar/render');
-    url.searchParams.append('action', 'TEMPLATE');
-    url.searchParams.append('text', event.title);
-    url.searchParams.append('dates', `${startDateTime}/${endDateTime}`);
-    url.searchParams.append('details', event.description || '');
-    url.searchParams.append('location', event.location || "IBOC");
-    window.open(url.toString(), '_blank');
+    if (!event.start) return;
+    try {
+        const startDateTime = new Date(event.start).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const endDateTime = new Date(event.end || event.start).toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const url = new URL('https://calendar.google.com/calendar/render');
+        url.searchParams.append('action', 'TEMPLATE');
+        url.searchParams.append('text', event.title);
+        url.searchParams.append('dates', `${startDateTime}/${endDateTime}`);
+        url.searchParams.append('details', event.description || '');
+        url.searchParams.append('location', event.location || "IBOC");
+        window.open(url.toString(), '_blank');
+    } catch (e) {
+        console.error("Erro ao gerar link de calendário", e);
+    }
   };
 
   const dailyQuote = useMemo(() => {
@@ -63,13 +72,31 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
   const scrollLeft = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' }); };
   const scrollRight = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' }); };
 
-  const upcomingEvent = events.length > 0 ? events[0] : null;
-  const carouselEvents = events.length > 1 ? events.slice(1) : [];
+  const upcomingEvent = useMemo(() => {
+    if (content.nextEventTitle && content.nextEventDate) {
+      return {
+        id: 'featured-manual',
+        title: content.nextEventTitle,
+        start: `${content.nextEventDate}T${content.nextEventTime || '19:00'}:00`,
+        end: `${content.nextEventDate}T${content.nextEventTime || '19:00'}:00`,
+        location: content.nextEventLocation,
+        description: content.nextEventDescription,
+        bannerUrl: content.nextEventBannerUrl,
+        type: 'Destaque'
+      } as ChurchEvent;
+    }
+    return events.length > 0 ? events[0] : null;
+  }, [content, events]);
+
+  const carouselEvents = useMemo(() => {
+      if (content.nextEventTitle) return events;
+      return events.length > 1 ? events.slice(1) : [];
+  }, [content.nextEventTitle, events]);
 
   return (
     <div className="flex flex-col w-full bg-stone-50">
       
-      {/* Hero Section - Cinematic Animations & Luxury Overlays */}
+      {/* Hero Section */}
       <section className="relative min-h-[600px] md:h-[85vh] flex items-center justify-center text-center px-4 overflow-hidden">
         <div className="absolute inset-0 z-0">
            <img 
@@ -78,11 +105,9 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
              className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-105"
            />
            <div className="absolute inset-0 bg-gradient-to-b from-navy-900/40 via-navy-900/20 to-navy-900/90" />
-           <div className="absolute inset-0 bg-black/10" />
         </div>
 
         <div className="relative z-20 max-w-4xl mx-auto space-y-8 pt-12">
-          
           <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="inline-flex items-center justify-center gap-4">
               <div className="h-[1px] w-12 bg-gold-500/50"></div>
@@ -116,11 +141,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
               </button>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* Quick Info Bar - Definitive Removal of YouTube Links */}
+      {/* Quick Info Bar */}
       <div className="container mx-auto px-4 relative z-30 -mt-16 mb-12 max-w-4xl">
         <div className="bg-white rounded-2xl shadow-soft grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 overflow-hidden border border-gray-100/50">
             {[
@@ -140,261 +164,102 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         </div>
       </div>
 
-       {/* Agenda Section */}
-       {events.length > 0 && (
+      {upcomingEvent && (
           <section className="py-24 bg-stone-50 overflow-hidden">
              <div className="container mx-auto px-6">
-                
                 <div className="mb-12 text-left">
                    <span className="text-gold-600 font-sans font-bold tracking-[0.2em] uppercase text-xs">Agenda Ministerial</span>
                    <h2 className="text-3xl md:text-5xl font-serif text-navy-900 mt-3">Vida em Comunidade</h2>
                    <div className="w-16 h-1 bg-gold-500 mt-4"></div>
                 </div>
 
-                {upcomingEvent && (
-                    <RevealOnScroll>
-                        <div className="bg-navy-900 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[550px] mb-20 group">
-                            <div className="md:w-1/2 p-10 md:p-20 flex flex-col justify-center relative">
-                                <div className="absolute top-0 left-0 p-[200px] bg-gold-500/5 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+                <RevealOnScroll>
+                    <div className="bg-navy-900 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[550px] mb-20 group">
+                        <div className="md:w-1/2 p-10 md:p-20 flex flex-col justify-center relative">
+                            <div className="relative z-10">
+                                <span className="text-gold-500 font-sans font-bold tracking-[0.3em] uppercase text-[10px] mb-6 block border-l-2 border-gold-500 pl-4">
+                                    Destaque da Semana
+                                </span>
+                                <h2 className="text-4xl md:text-6xl font-serif text-white mb-8 leading-tight">
+                                    {upcomingEvent.title}
+                                </h2>
+                                <p className="text-gray-400 mb-12 text-lg font-light leading-relaxed">
+                                    {upcomingEvent.description || "Convidamos você e sua família para um momento inesquecível de adoração."}
+                                </p>
                                 
-                                <div className="relative z-10">
-                                    <span className="text-gold-500 font-sans font-bold tracking-[0.3em] uppercase text-[10px] mb-6 block border-l-2 border-gold-500 pl-4">
-                                        Destaque da Semana
-                                    </span>
-                                    <h2 className="text-4xl md:text-6xl font-serif text-white mb-8 leading-tight">
-                                        {upcomingEvent.title}
-                                    </h2>
-                                    <p className="text-gray-400 mb-12 text-lg font-light leading-relaxed">
-                                        {upcomingEvent.description || "Convidamos você e sua família para um momento inesquecível de adoração e crescimento espiritual na IBOC."}
-                                    </p>
-                                    
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-12">
-                                        <div className="flex items-center gap-4 text-white/90">
-                                            <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-gold-500"><Calendar size={20}/></div>
-                                            <span className="text-base font-medium capitalize">
-                                                {new Date(upcomingEvent.start).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'long' })}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4 text-white/90">
-                                            <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-gold-500"><Clock size={20}/></div>
-                                            <span className="text-base font-medium">
-                                                {new Date(upcomingEvent.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-12">
+                                    <div className="flex items-center gap-4 text-white/90">
+                                        <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-gold-500"><Calendar size={20}/></div>
+                                        <span className="text-base font-medium capitalize">
+                                            {upcomingEvent.start ? new Date(upcomingEvent.start).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'long' }) : '---'}
+                                        </span>
                                     </div>
-
-                                    <Button variant="secondary" onClick={() => handleAddToCalendar(upcomingEvent)} className="w-full md:w-auto text-navy-900 shadow-glow rounded-xl px-12 py-5 font-bold">
-                                        <CalendarPlus className="mr-3" size={20} /> Adicionar à Agenda
-                                    </Button>
+                                    <div className="flex items-center gap-4 text-white/90">
+                                        <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-gold-500"><Clock size={20}/></div>
+                                        <span className="text-base font-medium">
+                                            {upcomingEvent.start ? new Date(upcomingEvent.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '---'}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="md:w-1/2 relative min-h-[350px]">
-                                <img 
-                                    src={upcomingEvent.bannerUrl || "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"} 
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
-                                    alt={upcomingEvent.title} 
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-navy-900/10 to-navy-900"></div>
+
+                                <Button variant="secondary" onClick={() => handleAddToCalendar(upcomingEvent)} className="w-full md:w-auto text-navy-900 shadow-glow rounded-xl px-12 py-5 font-bold">
+                                    <CalendarPlus className="mr-3" size={20} /> Adicionar à Agenda
+                                </Button>
                             </div>
                         </div>
-                    </RevealOnScroll>
-                )}
+                        <div className="md:w-1/2 relative min-h-[350px]">
+                            <img 
+                                src={upcomingEvent.bannerUrl || "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"} 
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
+                                alt={upcomingEvent.title} 
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-navy-900/10 to-navy-900"></div>
+                        </div>
+                    </div>
+                </RevealOnScroll>
 
                 {carouselEvents.length > 0 && (
                     <div className="relative">
                         <div className="flex justify-between items-center mb-8 px-2">
                              <h3 className="text-2xl font-serif text-navy-900 italic">Outros Encontros</h3>
                              <div className="flex gap-4">
-                                <button onClick={scrollLeft} className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-navy-900 hover:text-white hover:border-navy-900 transition-all shadow-sm bg-white"><ChevronLeft size={24}/></button>
-                                <button onClick={scrollRight} className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-navy-900 hover:text-white hover:border-navy-900 transition-all shadow-sm bg-white"><ChevronRight size={24}/></button>
+                                <button onClick={scrollLeft} className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-navy-900 hover:text-white transition-all shadow-sm bg-white"><ChevronLeft size={24}/></button>
+                                <button onClick={scrollRight} className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-navy-900 hover:text-white transition-all shadow-sm bg-white"><ChevronRight size={24}/></button>
                              </div>
                         </div>
 
-                        <div 
-                        ref={scrollContainerRef}
-                        className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                        >
-                        {carouselEvents.map((event) => {
-                            const startDate = new Date(event.start);
-                            return (
-                                <div key={event.id} className="min-w-[300px] sm:min-w-[350px] bg-white rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500 snap-center group border border-gray-100 flex flex-col h-full">
-                                    <div className="relative h-56 overflow-hidden rounded-t-3xl">
-                                        <img 
-                                            src={event.bannerUrl || "https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=2000&auto=format&fit=crop"} 
-                                            alt={event.title} 
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                        <div className="absolute inset-0 bg-navy-900/10 group-hover:bg-navy-900/0 transition-colors" />
-                                        
-                                        <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl text-center shadow-xl border border-gold-100/50">
-                                            <span className="block text-2xl font-serif text-navy-900 leading-none font-bold">{startDate.getDate()}</span>
-                                            <span className="block text-[10px] uppercase tracking-widest text-gold-600 mt-1 font-bold">{startDate.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()}</span>
+                        <div ref={scrollContainerRef} className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            {carouselEvents.map((event) => {
+                                const startDate = event.start ? new Date(event.start) : new Date();
+                                return (
+                                    <div key={event.id} className="min-w-[300px] sm:min-w-[350px] bg-white rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500 snap-center group border border-gray-100 flex flex-col h-full">
+                                        <div className="relative h-56 overflow-hidden rounded-t-3xl">
+                                            <img src={event.bannerUrl || "https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=2000&auto=format&fit=crop"} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                            <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl text-center shadow-xl border border-gold-100/50">
+                                                <span className="block text-2xl font-serif text-navy-900 leading-none font-bold">{startDate.getDate()}</span>
+                                                <span className="block text-[10px] uppercase tracking-widest text-gold-600 mt-1 font-bold">{startDate.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-8 flex-1 flex flex-col">
+                                            <div className="mb-4"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-600 bg-gold-50 px-3 py-1 rounded-full">{event.type}</span></div>
+                                            <h3 className="text-2xl font-serif text-navy-900 mb-4 group-hover:text-gold-600 transition-colors line-clamp-2 min-h-[4rem] leading-tight">{event.title}</h3>
+                                            <div className="space-y-3 mb-8 text-gray-500 text-sm font-light">
+                                                <div className="flex items-center gap-3"><Clock size={16} className="text-gold-500" /><span>{startDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span></div>
+                                                <div className="flex items-center gap-3"><MapPin size={16} className="text-gold-500" /><span className="truncate">{event.location}</span></div>
+                                            </div>
+                                            <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
+                                                <button onClick={() => handleAddToCalendar(event)} className="text-gold-600 hover:text-navy-900 transition-colors"><CalendarPlus size={20}/></button>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    <div className="p-8 flex-1 flex flex-col">
-                                        <div className="mb-4">
-                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-600 bg-gold-50 px-3 py-1 rounded-full">{event.type}</span>
-                                        </div>
-                                        <h3 className="text-2xl font-serif text-navy-900 mb-4 group-hover:text-gold-600 transition-colors line-clamp-2 min-h-[4rem] leading-tight">{event.title}</h3>
-                                        
-                                        <div className="space-y-3 mb-8 text-gray-500 text-sm font-light">
-                                            <div className="flex items-center gap-3">
-                                                <Clock size={16} className="text-gold-500" />
-                                                <span>{startDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <MapPin size={16} className="text-gold-500" />
-                                                <span className="truncate">{event.location}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-                                            <div className="flex -space-x-3">
-                                                {event.roster && event.roster.length > 0 ? event.roster.slice(0,3).map((r, i) => (
-                                                    <div key={i} className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center text-[11px] text-navy-900 font-bold overflow-hidden" title={r.memberName}>
-                                                        {r.photoUrl ? <img src={r.photoUrl} className="w-full h-full object-cover"/> : r.memberName.charAt(0)}
-                                                    </div>
-                                                )) : <span className="text-xs text-gray-400 italic">Escala Aberta</span>}
-                                            </div>
-                                            <button onClick={() => handleAddToCalendar(event)} className="text-gold-600 hover:text-navy-900 transition-colors"><CalendarPlus size={20}/></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
              </div>
           </section>
        )}
-
-      {latestSocialProject && (
-          <section className="py-32 bg-stone-100 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-1/3 h-full bg-gold-500/5 -skew-x-12 transform translate-x-1/2"></div>
-             <div className="container mx-auto px-6 relative z-10">
-                <div className="flex flex-col lg:flex-row gap-20 items-center">
-                    <div className="lg:w-2/5 space-y-8 text-center lg:text-left">
-                        <span className="text-gold-600 font-sans font-bold tracking-[0.3em] uppercase text-xs flex items-center justify-center lg:justify-start gap-3">
-                            <Heart size={16} className="fill-current animate-pulse text-red-500"/> Amor ao Próximo
-                        </span>
-                        <h2 className="text-5xl md:text-7xl font-serif text-navy-900 leading-none">
-                            {latestSocialProject.title}
-                        </h2>
-                        <div className="w-24 h-1.5 bg-gold-500 mx-auto lg:mx-0 rounded-full"></div>
-                        <p className="text-gray-600 font-light text-xl leading-relaxed italic">
-                            "{latestSocialProject.description}"
-                        </p>
-                        <div className="pt-6">
-                            <Button variant="outline" onClick={() => onNavigate(PageView.PUBLIC_SOCIAL)} className="px-12 py-4 rounded-xl border-2 border-navy-900 text-navy-900 font-bold hover:bg-navy-900 hover:text-white transition-all shadow-xl">
-                                Nossa Galeria Social
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="lg:w-3/5 w-full">
-                        {latestSocialProject.gallery && latestSocialProject.gallery.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 transform lg:rotate-2">
-                                {latestSocialProject.gallery.slice(0, 4).map((item, idx) => (
-                                    <div 
-                                        key={idx} 
-                                        className={`rounded-3xl overflow-hidden shadow-2xl group relative bg-white flex flex-col h-full hover:shadow-gold-500/20 transition-all duration-700 hover:-translate-y-2 ${idx % 2 === 0 ? 'lg:-translate-y-8' : 'lg:translate-y-8'}`}
-                                    >
-                                        <div className="h-72 overflow-hidden relative">
-                                            <img 
-                                                src={item.imageUrl} 
-                                                alt={`Ação Social ${idx + 1}`} 
-                                                className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-125"
-                                            />
-                                            <div className="absolute inset-0 bg-navy-900/20 group-hover:bg-transparent transition-colors duration-1000"></div>
-                                        </div>
-                                        
-                                        <div className="p-8 flex-1 flex flex-col justify-center text-center bg-white relative z-10">
-                                            <QuoteIcon size={24} className="text-gold-500/30 mx-auto mb-4" />
-                                            <p className="text-navy-900 font-serif italic text-xl leading-relaxed mb-4">
-                                                "{item.verse}"
-                                            </p>
-                                            <span className="text-[11px] uppercase tracking-[0.4em] text-gold-600 font-bold">
-                                                {item.verseReference}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="h-96 bg-navy-900/5 rounded-[3rem] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-                                <ImageIcon size={64} className="opacity-20" />
-                            </div>
-                        )}
-                    </div>
-                </div>
-             </div>
-          </section>
-      )}
-
-      {/* Daily Reflection Section */}
-      <section className="relative py-40 overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 w-full h-full z-0">
-            <video 
-                autoPlay 
-                loop 
-                muted 
-                playsInline 
-                className="absolute w-full h-full object-cover"
-                poster="https://images.unsplash.com/photo-1505481353724-5c91dc5725f4?q=80&w=2070"
-            >
-                <source src="https://cdn.coverr.co/videos/coverr-sun-shining-through-trees-in-forest-4554/1080p.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-stone-50/70 backdrop-blur-[2px]"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-transparent to-stone-50"></div>
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-           <RevealOnScroll>
-              <div className="max-w-4xl mx-auto bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[3rem] p-12 md:p-24 text-center shadow-2xl relative overflow-hidden">
-                   <div className="mb-12 flex justify-center">
-                       <div className="w-20 h-20 rounded-full border border-gold-500/40 flex items-center justify-center bg-white/40 backdrop-blur-sm shadow-xl animate-bounce-slow">
-                           <QuoteIcon size={32} className="text-gold-500 fill-current" />
-                       </div>
-                   </div>
-
-                   <blockquote className="font-serif text-3xl md:text-5xl text-navy-900 leading-tight mb-12 drop-shadow-sm italic">
-                       "{dailyQuote.text}"
-                   </blockquote>
-
-                   <div className="flex flex-col items-center">
-                       <div className="w-24 h-px bg-gold-500 mb-6"></div>
-                       <cite className="font-sans font-bold text-xl text-navy-900 not-italic tracking-[0.3em] uppercase">
-                           {dailyQuote.author}
-                       </cite>
-                       {dailyQuote.source && (
-                           <span className="text-sm text-gold-600 mt-3 font-light italic tracking-widest">{dailyQuote.source}</span>
-                       )}
-                   </div>
-              </div>
-           </RevealOnScroll>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-32 bg-navy-900 text-white relative overflow-hidden flex items-center justify-center">
-         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-         <div className="absolute top-0 right-0 p-[400px] bg-gold-500/10 rounded-full blur-[120px] transform translate-x-1/2 -translate-y-1/2"></div>
-         
-         <div className="container mx-auto px-6 relative z-10 text-center max-w-3xl">
-            <span className="text-gold-500 font-sans tracking-[0.5em] uppercase text-xs mb-6 block font-bold">A Casa é Sua</span>
-            <h2 className="text-5xl md:text-7xl font-serif mb-10 leading-tight">Um lugar para pertencer</h2>
-            <p className="text-gray-300 text-xl font-light leading-relaxed mb-12 italic opacity-80">
-                "Não somos apenas uma igreja, somos uma família que caminha rumo ao Caminho, que é Cristo."
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-                <Button variant="secondary" size="lg" onClick={() => onNavigate(PageView.PUBLIC_CONTACT)} className="shadow-glow rounded-xl px-12 py-5 font-bold text-navy-900">Agendar Visita</Button>
-                <Button variant="outline" className="text-white border-white/20 hover:bg-white hover:text-navy-900 rounded-xl px-12 py-5 font-bold backdrop-blur-sm">Ministérios</Button>
-            </div>
-         </div>
-      </section>
     </div>
   );
 };

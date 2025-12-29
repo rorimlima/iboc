@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { SiteContent, ChurchEvent, SocialProject, SocialProjectItem } from '../../types';
 import { Button } from '../ui/Button';
-import { Save, Loader2, Upload, ImageIcon, Calendar, Download, X, Plus, Heart, Trash2 } from 'lucide-react';
+import { Save, Loader2, Upload, ImageIcon, Calendar, Download, X, Plus, Heart, Trash2, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 import { getSiteContent, updateSiteContent, uploadImage, getCollection } from '../../services/firestore';
 import { INITIAL_SITE_CONTENT, SOCIAL_ACTION_VERSES } from '../../data';
 
@@ -16,13 +16,19 @@ export const AdminSiteContent: React.FC<AdminSiteContentProps> = ({ content: ini
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadingEventBanner, setUploadingEventBanner] = useState(false);
   const [batchUploading, setBatchUploading] = useState(false);
 
   const [agendaEvents, setAgendaEvents] = useState<ChurchEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const [socialProjects, setSocialProjects] = useState<SocialProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
+
+  // Estilos globais para inputs garantindo fundo branco e texto escuro
+  const inputClass = "w-full border border-gray-200 p-3 rounded-xl bg-white text-navy-900 focus:ring-2 focus:ring-navy-900 focus:border-transparent focus:outline-none placeholder-gray-400 transition-all text-sm font-medium shadow-sm appearance-none";
+  const labelClass = "text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2 block ml-1";
 
   useEffect(() => {
     const loadContent = async () => {
@@ -43,9 +49,15 @@ export const AdminSiteContent: React.FC<AdminSiteContentProps> = ({ content: ini
     try {
       const events = await getCollection<ChurchEvent>('events');
       const now = new Date();
-      const futureEvents = events.filter(e => new Date(e.start) >= now);
-      futureEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-      setAgendaEvents(futureEvents);
+      // Filtra eventos que ainda vão acontecer
+      const futureEvents = events.filter(e => e.start && new Date(e.end || e.start) >= now);
+      
+      if (futureEvents.length === 0) {
+        alert("Não encontramos eventos futuros na agenda.");
+      } else {
+        futureEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+        setAgendaEvents(futureEvents);
+      }
     } catch (error) {
       alert("Erro ao carregar agenda.");
     } finally {
@@ -53,41 +65,35 @@ export const AdminSiteContent: React.FC<AdminSiteContentProps> = ({ content: ini
     }
   };
 
-  const loadSocialProjects = async () => {
-      setLoadingProjects(true);
-      const data = await getCollection<SocialProject>('social_projects');
-      data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setSocialProjects(data);
-      setLoadingProjects(false);
-  };
-
-  const importSocialProject = (project: SocialProject) => {
-      if(!confirm(`Deseja substituir o destaque pelos dados de "${project.title}"?`)) return;
-      
-      setFormData(prev => ({
-          ...prev,
-          socialProjectTitle: project.title,
-          socialProjectDescription: project.description,
-          socialProjectItems: project.gallery.slice(0, 4)
-      }));
-  };
-
   const importAgendaEvent = (event: ChurchEvent) => {
-    if(!confirm(`Deseja atualizar o destaque para "${event.title}"?`)) return;
+    if (!event.start) return alert("Evento sem data válida.");
+    
+    setSelectedEventId(event.id);
 
-    const startDate = new Date(event.start);
-    const dateStr = startDate.toISOString().split('T')[0];
-    const timeStr = startDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    try {
+        const startDate = new Date(event.start);
+        const dateStr = startDate.toISOString().split('T')[0];
+        const timeStr = startDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-    setFormData(prev => ({
-      ...prev,
-      nextEventTitle: event.title,
-      nextEventDate: dateStr,
-      nextEventTime: timeStr,
-      nextEventLocation: event.location,
-      nextEventDescription: event.description || ''
-    }));
-    setAgendaEvents([]);
+        setFormData(prev => ({
+          ...prev,
+          nextEventTitle: event.title,
+          nextEventDate: dateStr,
+          nextEventTime: timeStr,
+          nextEventLocation: event.location,
+          nextEventDescription: event.description || '',
+          nextEventBannerUrl: event.bannerUrl || ''
+        }));
+        
+        // Pequeno delay para feedback visual antes de fechar a lista
+        setTimeout(() => {
+          setAgendaEvents([]);
+          setSelectedEventId(null);
+        }, 300);
+
+    } catch (err) {
+        alert("Erro no processamento da data.");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -98,55 +104,21 @@ export const AdminSiteContent: React.FC<AdminSiteContentProps> = ({ content: ini
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     try {
         const url = await uploadImage(file, 'site_assets');
         setFormData(prev => ({ ...prev, heroImageUrl: url }));
-    } catch (error) {
-        alert("Erro no upload da imagem.");
-    } finally {
-        setUploading(false);
-    }
+    } catch { alert("Erro no upload."); } finally { setUploading(false); }
   };
 
-  const handleBatchImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setBatchUploading(true);
+  const handleEventBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingEventBanner(true);
     try {
-        const uploadPromises = Array.from(files).map((file: File) => uploadImage(file, 'social_projects'));
-        const newUrls = await Promise.all(uploadPromises);
-        
-        const now = Date.now();
-        const newItems: SocialProjectItem[] = newUrls.map((url, index) => {
-            const randomVerse = SOCIAL_ACTION_VERSES[Math.floor(Math.random() * SOCIAL_ACTION_VERSES.length)];
-            return {
-                imageUrl: url,
-                verse: randomVerse.text,
-                verseReference: randomVerse.ref,
-                registeredAt: now + index
-            };
-        });
-
-        setFormData(prev => ({
-            ...prev,
-            socialProjectItems: [...(prev.socialProjectItems || []), ...newItems]
-        }));
-    } catch (error) {
-        alert("Erro no upload múltiplo.");
-    } finally {
-        setBatchUploading(false);
-        e.target.value = '';
-    }
-  };
-
-  const removeSocialItem = (registeredAt: number) => {
-      setFormData(prev => ({
-          ...prev,
-          socialProjectItems: prev.socialProjectItems?.filter(item => item.registeredAt !== registeredAt)
-      }));
+        const url = await uploadImage(file, 'highlight_banners');
+        setFormData(prev => ({ ...prev, nextEventBannerUrl: url }));
+    } catch { alert("Erro no upload."); } finally { setUploadingEventBanner(false); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,124 +127,155 @@ export const AdminSiteContent: React.FC<AdminSiteContentProps> = ({ content: ini
     try {
       await updateSiteContent(formData);
       onUpdate(formData); 
-      alert('Conteúdo atualizado com sucesso!');
-    } catch (error) {
-      alert('Erro ao salvar conteúdo.');
-    } finally {
-      setLoading(false);
-    }
+      alert('Destaques publicados com sucesso!');
+    } catch { alert('Erro ao salvar conteúdo.'); } finally { setLoading(false); }
   };
 
-  if (fetching) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-navy-900"/></div>;
+  if (fetching) return (
+    <div className="flex flex-col items-center justify-center p-32 space-y-4">
+      <Loader2 className="animate-spin text-navy-900" size={40}/>
+      <p className="text-gray-400 font-medium italic">Sincronizando Conteúdo...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-           <h1 className="text-2xl font-heading font-bold text-navy-900">Conteúdo do Site</h1>
-           <p className="text-gray-500 text-sm">Controle dos destaques da Home Page.</p>
+           <h1 className="text-2xl font-bold text-navy-900 font-serif">Gestão de Destaques</h1>
+           <p className="text-sm text-gray-500">Controle o que aparece na vitrine da IBOC.</p>
         </div>
-        <Button onClick={handleSubmit} disabled={loading || uploading || batchUploading}>
+        <Button onClick={handleSubmit} disabled={loading || uploading || batchUploading || uploadingEventBanner} className="shadow-glow px-10 rounded-xl font-bold">
           {loading ? <Loader2 className="mr-2 animate-spin" size={18}/> : <Save size={18} className="mr-2" />}
-          {loading ? 'Salvando...' : 'Publicar Alterações'}
+          {loading ? 'PUBLICANDO...' : 'PUBLICAR NO SITE'}
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Banner Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-heading font-bold text-lg text-navy-900 mb-4 border-b pb-2 flex items-center gap-2">
-            <ImageIcon size={20} className="text-gold-600"/> Banner Principal
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Seção Banner de Boas-Vindas */}
+        <div className="bg-white p-8 rounded-3xl shadow-soft border border-gray-100 space-y-6">
+          <h3 className="font-serif font-bold text-xl text-navy-900 flex items-center gap-3">
+            <ImageIcon size={24} className="text-gold-500"/> Banner de Entrada (Hero)
           </h3>
-          <div className="space-y-4">
-             <div className="flex items-start gap-4">
-                <div className="w-32 h-20 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                    {formData.heroImageUrl ? <img src={formData.heroImageUrl} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-gray-400 text-xs">Sem imagem</div>}
-                </div>
-                <div className="flex-1">
-                    <input type="file" accept="image/*" id="heroImageUpload" className="hidden" onChange={handleImageUpload} />
-                    <label htmlFor="heroImageUpload" className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
-                        {uploading ? <Loader2 className="animate-spin mr-2" size={16}/> : <Upload className="mr-2" size={16}/>} Carregar Imagem
+          <div className="space-y-6">
+             <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-50 border border-gray-100 group">
+                {formData.heroImageUrl ? (
+                  <img src={formData.heroImageUrl} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                    <ImageIcon size={40} className="opacity-20 mb-2"/>
+                    <span className="text-[10px] uppercase font-bold tracking-widest">Sem Imagem</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <label className="cursor-pointer bg-white text-navy-900 px-6 py-2.5 rounded-xl font-bold text-xs shadow-xl uppercase tracking-widest flex items-center gap-2">
+                        {uploading ? <Loader2 size={16} className="animate-spin"/> : <Upload size={16}/>} 
+                        {uploading ? 'Enviando...' : 'Alterar Imagem'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                     </label>
                 </div>
              </div>
-            <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label><input name="heroTitle" value={formData.heroTitle} onChange={handleChange} className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:outline-none" /></div>
-            <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Subtítulo</label><textarea name="heroSubtitle" value={formData.heroSubtitle} onChange={handleChange} className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:outline-none" rows={3}/></div>
-          </div>
-        </div>
-
-        {/* Social Project Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-             <div className="flex justify-between items-center border-b pb-2 mb-4">
-                 <h3 className="font-heading font-bold text-lg text-navy-900 flex items-center gap-2">
-                    <Heart size={20} className="text-red-500"/> Destaque Social
-                 </h3>
-                 <button type="button" onClick={loadSocialProjects} className="text-[10px] bg-navy-50 text-navy-900 px-2 py-1 rounded hover:bg-navy-100 flex items-center gap-1 font-bold uppercase tracking-widest">
-                    <Download size={12}/> Importar Projeto
-                 </button>
-             </div>
-             {socialProjects.length > 0 && (
-                <div className="mb-4 p-3 bg-stone-50 rounded-lg border border-dashed border-stone-200 grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
-                    {socialProjects.map(p => (
-                        <button key={p.id} onClick={() => { importSocialProject(p); setSocialProjects([]); }} className="text-left text-xs p-2 hover:bg-white rounded border border-transparent hover:border-stone-100 transition-all flex justify-between">
-                            <span className="font-bold">{p.title}</span>
-                            <span className="text-gray-400">{new Date(p.date).toLocaleDateString()}</span>
-                        </button>
-                    ))}
-                </div>
-             )}
-             <div className="space-y-4">
-                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label><input name="socialProjectTitle" value={formData.socialProjectTitle || ''} onChange={handleChange} className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:outline-none" /></div>
-                <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Descrição</label><textarea name="socialProjectDescription" value={formData.socialProjectDescription || ''} onChange={handleChange} rows={2} className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:outline-none" /></div>
-                
-                <div className="grid grid-cols-3 gap-2">
-                    {formData.socialProjectItems?.map((item) => (
-                        <div key={item.registeredAt} className="relative group rounded overflow-hidden aspect-square border border-gray-100">
-                            <img src={item.imageUrl} className="w-full h-full object-cover" />
-                            <button onClick={() => removeSocialItem(item.registeredAt)} className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10}/></button>
-                        </div>
-                    ))}
-                    <label className="aspect-square rounded border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
-                        {batchUploading ? <Loader2 size={16} className="animate-spin text-gold-600" /> : <Plus size={16} className="text-gray-400" />}
-                        <input type="file" multiple accept="image/*" className="hidden" onChange={handleBatchImageUpload} />
-                    </label>
-                </div>
-             </div>
-        </div>
-
-        {/* Next Event Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-4 border-b pb-2">
-             <h3 className="font-heading font-bold text-lg text-gold-600 flex items-center gap-2">
-                <Calendar size={20}/> Próximo Evento (Destaque)
-             </h3>
-             <button type="button" onClick={loadAgendaEvents} className="text-[10px] bg-gold-50 text-gold-700 px-2 py-1 rounded hover:bg-gold-100 flex items-center gap-1 font-bold uppercase tracking-widest border border-gold-200">
-                <Download size={12}/> Agenda
-             </button>
-          </div>
-          {agendaEvents.length > 0 && (
-              <div className="mb-4 p-3 bg-gold-50/30 rounded-lg border border-dashed border-gold-100 grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
-                {agendaEvents.map(ev => (
-                    <button key={ev.id} onClick={() => importAgendaEvent(ev)} className="text-left text-xs p-2 hover:bg-white rounded border border-transparent hover:border-gold-100 transition-all flex justify-between">
-                        <span className="font-bold">{ev.title}</span>
-                        <span className="text-gold-600">{new Date(ev.start).toLocaleDateString()}</span>
-                    </button>
-                ))}
-              </div>
-          )}
-          <div className="space-y-3">
-            <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label><input name="nextEventTitle" value={formData.nextEventTitle} onChange={handleChange} className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:outline-none" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Data</label><input name="nextEventDate" value={formData.nextEventDate} onChange={handleChange} type="date" className="w-full border border-gray-300 p-2 rounded-lg text-sm" /></div>
-              <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Hora</label><input name="nextEventTime" value={formData.nextEventTime} onChange={handleChange} type="time" className="w-full border border-gray-300 p-2 rounded-lg text-sm" /></div>
+            <div>
+              <label className={labelClass}>Título de Boas-Vindas</label>
+              <input name="heroTitle" value={formData.heroTitle} onChange={handleChange} className={inputClass} placeholder="EX: UM LUGAR DE FÉ E AMOR" />
+            </div>
+            <div>
+              <label className={labelClass}>Subtítulo / Chamada</label>
+              <textarea name="heroSubtitle" value={formData.heroSubtitle} onChange={handleChange} className={`${inputClass} h-24 resize-none`} rows={3} placeholder="Descreva o propósito da nossa igreja..."/>
             </div>
           </div>
         </div>
 
-        {/* Live Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-heading font-bold text-lg text-gray-800 mb-4 border-b pb-2 flex items-center gap-2">YouTube Live</h3>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Link do Canal/Live</label><input name="youtubeLiveLink" value={formData.youtubeLiveLink} onChange={handleChange} type="url" placeholder="https://youtube.com/..." className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-900" /></div>
+        {/* Seção Destaque Semanal - FERRAMENTA DE IMPORTAÇÃO */}
+        <div className="bg-white p-8 rounded-3xl shadow-soft border border-gray-100 space-y-6">
+          <div className="flex justify-between items-center border-b border-gray-50 pb-4">
+             <h3 className="font-serif font-bold text-xl text-gold-600 flex items-center gap-3">
+               <Calendar size={24}/> Destaque Semanal
+             </h3>
+             <button 
+              type="button" 
+              onClick={loadAgendaEvents} 
+              className="text-[10px] bg-gold-50 text-gold-700 px-4 py-2 rounded-xl hover:bg-gold-100 font-bold uppercase tracking-widest border border-gold-200 transition-all flex items-center gap-2"
+             >
+                {loadingEvents ? <Loader2 size={12} className="animate-spin"/> : <Download size={12}/>} 
+                {loadingEvents ? 'Carregando...' : 'Sincronizar Agenda'}
+             </button>
+          </div>
+
+          {agendaEvents.length > 0 && (
+              <div className="p-4 bg-gold-50/40 rounded-2xl border border-dashed border-gold-200 space-y-2 max-h-60 overflow-y-auto animate-in slide-in-from-top-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-gold-700 uppercase tracking-widest">Selecione para importar:</span>
+                  <button onClick={() => setAgendaEvents([])} className="text-gold-400 hover:text-gold-700"><X size={16}/></button>
+                </div>
+                <div className="grid gap-2">
+                  {agendaEvents.map(ev => (
+                      <button 
+                        key={ev.id} 
+                        onClick={() => importAgendaEvent(ev)} 
+                        className={`w-full text-left text-xs p-4 bg-white hover:bg-navy-900 hover:text-white rounded-xl border border-gold-100 transition-all flex justify-between items-center group shadow-sm ${selectedEventId === ev.id ? 'ring-2 ring-gold-500 bg-gold-50' : ''}`}
+                      >
+                          <div className="flex flex-col">
+                            <span className="font-bold text-navy-900 group-hover:text-white">{ev.title}</span>
+                            <span className="text-[10px] opacity-60 flex items-center gap-1 mt-1">
+                              <MapPin size={10}/> {ev.location}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <span className="block font-bold opacity-80">{new Date(ev.start).toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}</span>
+                                <span className="block opacity-60 text-[10px]">{new Date(ev.start).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                              </div>
+                              {selectedEventId === ev.id ? <CheckCircle2 size={18} className="text-green-500 animate-in zoom-in"/> : <Plus size={16} className="text-gold-400 group-hover:text-white"/>}
+                          </div>
+                      </button>
+                  ))}
+                </div>
+              </div>
+          )}
+
+          <div className="space-y-6">
+            <div className="relative h-48 rounded-2xl overflow-hidden bg-stone-50 border border-gray-100 group">
+                {formData.nextEventBannerUrl ? (
+                  <img src={formData.nextEventBannerUrl} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                    <ImageIcon size={40} className="opacity-20 mb-2"/>
+                    <span className="text-[10px] uppercase font-bold tracking-widest">Banner do Evento</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <label className="cursor-pointer bg-white text-navy-900 px-6 py-2.5 rounded-xl font-bold text-xs shadow-xl uppercase tracking-widest flex items-center gap-2">
+                        {uploadingEventBanner ? <Loader2 size={16} className="animate-spin"/> : <Upload size={16}/>} 
+                        {uploadingEventBanner ? 'Enviando...' : 'Carregar Banner'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleEventBannerUpload} />
+                    </label>
+                </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Título do Destaque</label>
+              <input name="nextEventTitle" value={formData.nextEventTitle} onChange={handleChange} className={inputClass} placeholder="EX: CONFERÊNCIA DE FAMÍLIA" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Data Fixada</label>
+                <input name="nextEventDate" value={formData.nextEventDate} onChange={handleChange} type="date" className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>Horário Previsto</label>
+                <input name="nextEventTime" value={formData.nextEventTime} onChange={handleChange} type="time" className={inputClass} />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Local do Encontro</label>
+              <input name="nextEventLocation" value={formData.nextEventLocation} onChange={handleChange} className={inputClass} placeholder="EX: TEMPLO PRINCIPAL" />
+            </div>
+            <div>
+              <label className={labelClass}>Convite Curto (Descrição)</label>
+              <textarea name="nextEventDescription" value={formData.nextEventDescription} onChange={handleChange} className={`${inputClass} h-24 resize-none`} rows={3} placeholder="Texto curto que convida as pessoas para o destaque..."/>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -15,7 +15,8 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  const inputClass = "w-full border border-gray-200 p-3 rounded-xl bg-white text-navy-900 focus:ring-2 focus:ring-navy-900 focus:border-transparent focus:outline-none placeholder-gray-400 transition-all text-sm font-medium";
+  // Forçado bg-white e text-navy-900 para evitar conflitos de cores e "fundo preto"
+  const inputClass = "w-full border border-gray-200 p-3 rounded-xl bg-white text-navy-900 focus:ring-2 focus:ring-navy-900 focus:border-transparent focus:outline-none placeholder-gray-400 transition-all text-sm font-medium shadow-sm";
   const labelClass = "text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2 block ml-1";
 
   const initialFormState: Omit<Member, 'id'> = {
@@ -118,7 +119,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
           <input 
             type="text" 
             placeholder="Buscar por nome, e-mail ou cargo..." 
-            className={inputClass + " pl-12 bg-stone-50/50 border-gray-100 focus:bg-white"} 
+            className={inputClass + " pl-12 border-gray-100 focus:bg-white"} 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
           />
@@ -414,7 +415,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                        className={inputClass + " h-32 resize-none shadow-inner border-gray-100"} 
                        value={formData.spiritualGifts || ''} 
                        onChange={e => setFormData({...formData, spiritualGifts: e.target.value})} 
-                       placeholder="Descreva aqui os dons, habilidades e ministérios em que o membro já atua ou deseja atuar (Ex: Louvor, Kids, Som, Zeladoria...)" 
+                       placeholder="Descreva aqui os dons, habilidades e ministérios em que o membro já atua ou deseja atuar..." 
                     />
                   </div>
                 </div>

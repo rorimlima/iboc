@@ -69,7 +69,7 @@ export interface ChurchEvent {
   title: string;
   start: string;
   end: string;
-  type: 'Culto' | 'Reunião' | 'Social' | 'EBD';
+  type: 'Culto' | 'Reunião' | 'Social' | 'EBD' | 'Destaque';
   location: string;
   description?: string;
   bannerUrl?: string;
@@ -145,6 +145,7 @@ export interface SiteContent {
   nextEventTime: string;
   nextEventDescription: string;
   nextEventLocation: string;
+  nextEventBannerUrl?: string;
   youtubeLiveLink: string;
   socialProjectTitle?: string;
   socialProjectDescription?: string;
