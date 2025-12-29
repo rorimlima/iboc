@@ -1,12 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SocialProject } from '../../types';
 import { getCollection } from '../../services/firestore';
-import { Loader2, Calendar, MapPin, Heart, Quote, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Heart, Quote, Camera, X, Maximize2 } from 'lucide-react';
+
+const IBOCStamp = () => (
+    <div className="absolute bottom-3 right-3 flex flex-col items-center pointer-events-none opacity-60 select-none group-hover:opacity-100 transition-opacity">
+        <div className="w-10 h-10 rounded-full border-2 border-gold-500/50 flex items-center justify-center bg-white/10 backdrop-blur-sm">
+            <svg viewBox="0 0 100 100" className="w-6 h-6">
+                <path d="M50 10 L 50 90 M 30 40 L 70 40" stroke="#C5A059" strokeWidth="8" fill="none" />
+            </svg>
+        </div>
+        <span className="text-[6px] text-white font-bold tracking-[0.2em] mt-1 drop-shadow-md">IBOC SOCIAL</span>
+    </div>
+);
 
 export const SocialPage: React.FC = () => {
   const [projects, setProjects] = useState<SocialProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProject, setSelectedProject] = useState<SocialProject | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{url: string, verse?: string, ref?: string} | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -22,201 +33,119 @@ export const SocialPage: React.FC = () => {
 
   return (
     <div className="bg-stone-50 min-h-screen pb-20">
-        
-        {/* Header - Elegant & Atmospheric */}
-        <div className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center px-4 overflow-hidden bg-rose-950">
+        {/* Hero */}
+        <div className="relative h-[40vh] min-h-[300px] flex items-center justify-center text-center px-4 overflow-hidden bg-rose-950">
              <div className="absolute inset-0">
-                 <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070" className="w-full h-full object-cover opacity-30" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-rose-950 via-rose-900/60 to-transparent" />
+                 <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070" className="w-full h-full object-cover opacity-30" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-rose-950 via-rose-900/40 to-transparent" />
              </div>
-             <div className="relative z-10 max-w-4xl space-y-6 animate-fade-in-up">
-                 <div className="inline-flex items-center justify-center gap-4 mb-2">
-                     <span className="h-px w-12 bg-gold-400/60"></span>
-                     <span className="text-gold-400 font-sans tracking-[0.4em] uppercase text-xs">Ação Social IBOC</span>
-                     <span className="h-px w-12 bg-gold-400/60"></span>
-                 </div>
-                 <h1 className="text-5xl md:text-7xl font-serif text-white leading-tight drop-shadow-lg">Amor em Movimento</h1>
-                 <p className="text-rose-100 text-xl md:text-2xl font-light font-serif italic max-w-2xl mx-auto leading-relaxed">
-                     "Filhinhos, não amemos de palavra, nem de língua, mas por obra e em verdade."
-                 </p>
-                 <span className="text-xs font-sans text-gold-500 block uppercase tracking-widest mt-4">1 João 3:18</span>
+             <div className="relative z-10 space-y-4 animate-fade-in-up">
+                 <h1 className="text-4xl md:text-6xl font-serif text-white">Amor em Ação</h1>
+                 <p className="text-rose-100 italic text-lg">"Não amemos de palavra, mas por obra e em verdade."</p>
              </div>
         </div>
 
-        <div className="container mx-auto px-4 md:px-8 py-20 space-y-32">
+        <div className="container mx-auto px-4 md:px-8 py-16 space-y-24">
             {projects.length === 0 ? (
-                <div className="text-center py-20 text-gray-400 border border-dashed border-gray-200 rounded-3xl bg-white/50">
-                    <Heart size={48} className="mx-auto text-rose-200 mb-4" />
-                    <p className="font-serif text-xl text-gray-500">Nenhum projeto registrado ainda.</p>
-                    <p className="text-sm mt-2">Em breve, novas histórias de amor ao próximo.</p>
-                </div>
+                <div className="text-center py-20 text-gray-400">Nenhum projeto registrado.</div>
             ) : (
                 projects.map((project, idx) => (
-                    <div key={project.id} className="group relative">
-                        {/* Project Header: Description & Featured Image */}
-                        <div className={`flex flex-col ${idx % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-12 lg:gap-20 items-center mb-12`}>
-                             
-                             {/* Text Content */}
-                             <div className="lg:w-1/2 space-y-8">
-                                 <div className="space-y-4">
-                                     <div className="flex items-center gap-3">
-                                         <span className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                                             {project.status || 'Projeto Social'}
-                                         </span>
-                                         <span className="h-px w-12 bg-rose-200"></span>
-                                     </div>
-                                     <h2 className="text-4xl md:text-5xl font-serif text-navy-900 leading-[1.1]">
-                                         {project.title}
-                                     </h2>
-                                 </div>
-                                 
-                                 <div className="flex flex-wrap gap-6 text-sm text-gray-500 font-medium py-4 border-y border-rose-100">
-                                     <div className="flex items-center gap-2">
-                                         <Calendar size={18} className="text-gold-500" />
-                                         {new Date(project.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                     </div>
-                                     {project.location && (
-                                         <div className="flex items-center gap-2">
-                                             <MapPin size={18} className="text-gold-500" />
-                                             {project.location}
-                                         </div>
-                                     )}
-                                     <div className="flex items-center gap-2">
-                                         <Camera size={18} className="text-gold-500" />
-                                         {project.gallery.length} fotos
-                                     </div>
-                                 </div>
-
-                                 <p className="text-gray-600 leading-loose font-light text-lg text-justify">
-                                     {project.description}
-                                 </p>
-                             </div>
-
-                             {/* Featured Image - "Framed Art" Effect */}
-                             <div className="lg:w-1/2 w-full px-4 lg:px-0">
-                                 <div className="relative">
-                                     {/* Background Frame Offset */}
-                                     <div className={`absolute -inset-4 border-2 border-gold-500/30 rounded-tr-[3rem] rounded-bl-[3rem] -z-10 transition-transform duration-700 group-hover:scale-105 ${idx % 2 === 0 ? 'translate-x-4 translate-y-4' : '-translate-x-4 -translate-y-4'}`}></div>
-                                     
-                                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-rose-900/20 aspect-[4/3] cursor-pointer" onClick={() => setSelectedProject(project)}>
-                                         <img 
-                                            src={project.bannerUrl || project.gallery[0]?.imageUrl || "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070"} 
-                                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
-                                            alt={project.title}
-                                         />
-                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
-                                         <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur text-navy-900 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                                             Ver Galeria Completa
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
+                    <div key={project.id} className="space-y-8">
+                        <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-rose-100 pb-6">
+                            <div className="max-w-2xl">
+                                <span className="text-gold-600 font-bold text-xs uppercase tracking-widest block mb-2">Projeto Social</span>
+                                <h2 className="text-3xl md:text-4xl font-serif text-navy-900 mb-4">{project.title}</h2>
+                                <p className="text-gray-600 font-light leading-relaxed">{project.description}</p>
+                            </div>
+                            <div className="flex gap-4 text-xs text-gray-500 font-medium whitespace-nowrap">
+                                <span className="flex items-center gap-1"><Calendar size={14}/> {new Date(project.date).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-1"><MapPin size={14}/> {project.location}</span>
+                            </div>
                         </div>
 
-                        {/* Luxurious Horizontal Carousel */}
-                        {project.gallery.length > 0 && (
-                            <div className="relative pl-4 lg:pl-0">
-                                <h3 className="font-serif italic text-2xl text-gray-400 mb-6 pl-2">Momentos</h3>
-                                
-                                {/* Scroll Container with Custom Scrollbar */}
-                                <div className="flex gap-6 overflow-x-auto pb-8 pt-2 px-2 snap-x snap-mandatory scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gold-400/50 hover:scrollbar-thumb-gold-500">
-                                    {project.gallery.map((item, i) => (
-                                        <div 
-                                            key={i} 
-                                            className="snap-center shrink-0 w-[300px] md:w-[400px] aspect-[4/3] relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer group/card"
-                                            onClick={() => setSelectedProject(project)}
-                                        >
-                                            <img 
-                                                src={item.imageUrl} 
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110" 
-                                                alt="Momento"
-                                            />
-                                            {/* Elegant Overlay with Verse */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-rose-950/90 via-rose-900/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 text-center">
-                                                <Quote size={20} className="text-gold-400 mx-auto mb-3 opacity-80" />
-                                                <p className="text-white font-serif italic text-sm md:text-base leading-relaxed mb-2 drop-shadow-md">
-                                                    "{item.verse}"
-                                                </p>
-                                                <span className="text-[10px] uppercase tracking-widest text-gold-400 font-bold">
-                                                    {item.verseReference}
-                                                </span>
-                                            </div>
+                        {/* Melhorei a Galeria para Estilo de Grid Variado */}
+                        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                            {project.gallery.map((item, i) => (
+                                <div 
+                                    key={i} 
+                                    className="relative group rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 cursor-zoom-in break-inside-avoid"
+                                    onClick={() => setSelectedImage({url: item.imageUrl, verse: item.verse, ref: item.verseReference})}
+                                >
+                                    <img 
+                                        src={item.imageUrl} 
+                                        className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-1000" 
+                                        alt="Galeria"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+                                    
+                                    {/* Carimbo Watermark IBOC */}
+                                    <IBOCStamp />
+
+                                    {/* Overlay com Versículo (Apenas Desktop) */}
+                                    <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-500">
+                                        <div className="bg-black/40 backdrop-blur-sm p-4 rounded-lg">
+                                            <Quote size={16} className="text-gold-400 mb-2" />
+                                            <p className="text-sm font-serif italic mb-2 line-clamp-3">"{item.verse}"</p>
+                                            <span className="text-[10px] uppercase font-bold text-gold-500">{item.verseReference}</span>
                                         </div>
-                                    ))}
-                                    {/* Spacer for right padding */}
-                                    <div className="w-4 shrink-0"></div>
+                                    </div>
+                                    
+                                    <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="bg-white/20 backdrop-blur-md p-1.5 rounded-full text-white">
+                                            <Maximize2 size={16} />
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        
-                        {/* Divider */}
-                        {idx !== projects.length - 1 && (
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-rose-200 to-transparent mt-24"></div>
-                        )}
+                            ))}
+                        </div>
                     </div>
                 ))
             )}
         </div>
 
-        {/* Full Screen Modal Gallery */}
-        {selectedProject && (
-            <div className="fixed inset-0 bg-navy-950/95 backdrop-blur-xl z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
-                <button 
-                    onClick={() => setSelectedProject(null)} 
-                    className="fixed top-6 right-6 text-white/50 hover:text-white z-50 transition-colors p-2 bg-white/5 rounded-full hover:bg-white/10"
-                >
-                    <XIcon className="w-8 h-8"/>
+        {/* Modal Visualização de Foto Completa */}
+        {selectedImage && (
+            <div className="fixed inset-0 bg-navy-950/98 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+                <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 bg-white/5 rounded-full">
+                    <X size={32}/>
                 </button>
                 
-                <div className="w-full max-w-7xl my-10">
-                    <div className="text-center mb-12">
-                        <span className="text-gold-500 text-xs tracking-[0.3em] uppercase block mb-2">Galeria de Fotos</span>
-                        <h2 className="text-3xl md:text-5xl font-serif text-white mb-2">{selectedProject.title}</h2>
-                        <p className="text-white/60 font-light">{new Date(selectedProject.date).toLocaleDateString()}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-                        {selectedProject.gallery.map((item, idx) => (
-                            <div key={idx} className="bg-white rounded-sm p-3 shadow-2xl transform transition-transform hover:-translate-y-2 duration-500 group">
-                                <div className="aspect-[4/3] relative overflow-hidden bg-gray-100">
-                                    <img src={item.imageUrl} className="w-full h-full object-cover filter sepia-[0.1] group-hover:sepia-0 transition-all duration-500" />
-                                </div>
-                                <div className="pt-6 pb-4 px-2 text-center">
-                                    <p className="text-navy-900 font-serif italic text-lg leading-relaxed mb-3">"{item.verse}"</p>
-                                    <div className="flex items-center justify-center gap-3">
-                                        <div className="h-px w-8 bg-gold-500/50"></div>
-                                        <span className="text-[10px] uppercase tracking-widest text-gold-700 font-bold">{item.verseReference}</span>
-                                        <div className="h-px w-8 bg-gold-500/50"></div>
-                                    </div>
-                                </div>
+                <div className="w-full max-w-5xl h-full flex flex-col justify-center gap-6 py-10">
+                    {/* Aqui o object-contain garante a foto completa */}
+                    <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+                        <img 
+                            src={selectedImage.url} 
+                            className="max-w-full max-h-full object-contain shadow-2xl rounded-sm" 
+                            alt="Visualização"
+                        />
+                        <div className="absolute bottom-4 right-4 pointer-events-none scale-150 origin-bottom-right">
+                             <div className="w-10 h-10 rounded-full border-2 border-gold-500/50 flex items-center justify-center bg-white/5 backdrop-blur-sm">
+                                <svg viewBox="0 0 100 100" className="w-6 h-6">
+                                    <path d="M50 10 L 50 90 M 30 40 L 70 40" stroke="#C5A059" strokeWidth="8" fill="none" />
+                                </svg>
                             </div>
-                        ))}
+                        </div>
                     </div>
+                    
+                    {selectedImage.verse && (
+                        <div className="text-center px-6 animate-in slide-in-from-bottom-4">
+                            <Quote size={24} className="text-gold-500 mx-auto mb-4" />
+                            <p className="text-white text-xl md:text-2xl font-serif italic mb-3 drop-shadow-md">
+                                "{selectedImage.verse}"
+                            </p>
+                            <span className="text-gold-500 font-bold uppercase tracking-widest text-xs">
+                                {selectedImage.ref}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         )}
-        
-        {/* Style for custom scrollbar */}
+
         <style>{`
-            .scrollbar-thin::-webkit-scrollbar {
-                height: 6px;
-            }
-            .scrollbar-track-transparent::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .scrollbar-thumb-gold-400\\/50::-webkit-scrollbar-thumb {
-                background-color: rgba(212, 180, 115, 0.5);
-                border-radius: 20px;
-            }
-            .scrollbar-thumb-gold-400\\/50::-webkit-scrollbar-thumb:hover {
-                background-color: #C5A059;
-            }
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}</style>
     </div>
   );
 };
-
-// Helper for Close Icon
-const XIcon = ({className}:{className?:string}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
-);
