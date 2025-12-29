@@ -14,8 +14,8 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  const inputClass = "w-full border border-gray-200 p-2.5 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-navy-900 focus:border-transparent focus:outline-none placeholder-gray-400 transition-all text-sm";
-  const labelClass = "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 block ml-1";
+  const inputClass = "w-full border border-gray-200 p-3 rounded-xl bg-white text-navy-900 focus:ring-2 focus:ring-navy-900 focus:border-transparent focus:outline-none placeholder-gray-400 transition-all text-sm font-medium";
+  const labelClass = "text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2 block ml-1";
 
   const initialFormState: Omit<Member, 'id'> = {
     fullName: '',
@@ -103,98 +103,100 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-navy-900 font-serif">Membros</h1>
-          <p className="text-sm text-gray-500">Gestão completa do corpo de membros.</p>
+          <h1 className="text-2xl font-bold text-navy-900 font-serif">Membros IBOC</h1>
+          <p className="text-sm text-gray-500 font-sans tracking-tight">Gestão ministerial e controle de membresia.</p>
         </div>
-        <Button onClick={() => { setEditingId(null); setFormData(initialFormState); setShowModal(true); }} className="shadow-glow">
+        <Button onClick={() => { setEditingId(null); setFormData(initialFormState); setShowModal(true); }} className="shadow-glow px-10 rounded-xl font-bold">
           <Plus size={18} className="mr-2"/> Novo Membro
         </Button>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
+      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6">
         <div className="relative flex-grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500" size={20} />
           <input 
             type="text" 
             placeholder="Buscar por nome, e-mail ou cargo..." 
-            className={inputClass + " pl-12 bg-stone-50/50"} 
+            className={inputClass + " pl-12 bg-stone-50/50 border-gray-100 focus:bg-white"} 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+      <div className="bg-white rounded-3xl shadow-soft overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-stone-50 text-gray-500 font-bold uppercase tracking-widest text-[10px] border-b border-gray-100">
+            <thead className="bg-stone-50 text-gray-500 font-bold uppercase tracking-[0.2em] text-[10px] border-b border-gray-100">
               <tr>
-                <th className="px-6 py-5">Membro</th>
-                <th className="px-6 py-5 hidden md:table-cell">Contato</th>
-                <th className="px-6 py-5 hidden lg:table-cell">Cargo / Status</th>
-                <th className="px-6 py-5 text-right">Ações</th>
+                <th className="px-8 py-6">Perfil do Membro</th>
+                <th className="px-8 py-6 hidden md:table-cell">Informações de Contato</th>
+                <th className="px-8 py-6 hidden lg:table-cell text-center">Eclesiástico</th>
+                <th className="px-8 py-6 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-20 text-center">
-                    <Loader2 className="animate-spin text-gold-500 mx-auto" size={40} />
-                    <p className="text-gray-400 mt-4 italic">Sincronizando registros...</p>
+                  <td colSpan={4} className="py-32 text-center">
+                    <Loader2 className="animate-spin text-gold-500 mx-auto" size={48} />
+                    <p className="text-gray-400 mt-6 italic tracking-widest text-xs uppercase">Sincronizando Fichas...</p>
                   </td>
                 </tr>
               ) : members.filter(m => m.fullName.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-20 text-center text-gray-400 italic">Nenhum membro encontrado.</td>
+                  <td colSpan={4} className="py-20 text-center text-gray-400 italic">Nenhum membro encontrado com os critérios de busca.</td>
                 </tr>
               ) : (
                 members.filter(m => m.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map(m => (
-                  <tr key={m.id} className="hover:bg-stone-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-navy-50 border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
+                  <tr key={m.id} className="hover:bg-stone-50/80 transition-all group">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-full bg-navy-50 border-4 border-white shadow-xl overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform duration-500 ring-1 ring-gray-100">
                           {m.photoUrl ? (
                             <img src={m.photoUrl} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-navy-900 font-bold text-lg">{m.fullName[0]}</div>
+                            <div className="w-full h-full flex items-center justify-center text-navy-900 font-serif font-bold text-xl uppercase">{m.fullName[0]}</div>
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-navy-900 text-base">{m.fullName}</p>
-                          <p className="text-[10px] uppercase tracking-tighter text-gold-600 font-bold">{m.role}</p>
+                          <p className="font-bold text-navy-900 text-base font-serif">{m.fullName}</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-gold-600 font-bold mt-0.5">{m.role}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 hidden md:table-cell">
-                      <div className="space-y-1">
-                        <p className="flex items-center gap-2 text-gray-600"><Mail size={12} className="text-gray-400"/> {m.email || 'N/A'}</p>
-                        <p className="flex items-center gap-2 text-gray-600"><Phone size={12} className="text-gray-400"/> {m.phone || 'N/A'}</p>
+                    <td className="px-8 py-5 hidden md:table-cell">
+                      <div className="space-y-1.5">
+                        <p className="flex items-center gap-3 text-gray-600 font-medium"><Mail size={14} className="text-gold-500"/> {m.email || 'Não cadastrado'}</p>
+                        <p className="flex items-center gap-3 text-gray-600 font-medium"><Phone size={14} className="text-gold-500"/> {m.phone || 'N/A'}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 hidden lg:table-cell">
-                      <div className="flex flex-col gap-2">
-                        <span className={`w-fit px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                          m.status === 'Ativo' ? 'bg-green-50 text-green-700 border border-green-100' : 
-                          m.status === 'Ausente' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
-                          'bg-red-50 text-red-700 border border-red-100'
+                    <td className="px-8 py-5 hidden lg:table-cell text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${
+                          m.status === 'Ativo' ? 'bg-green-50 text-green-700 border border-green-200' : 
+                          m.status === 'Ausente' ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' :
+                          'bg-red-50 text-red-700 border border-red-200'
                         }`}>
                           {m.status}
                         </span>
-                        <span className="text-[10px] text-gray-400 font-medium">Recepção: {new Date(m.receptionDate || '').toLocaleDateString('pt-BR')}</span>
+                        <div className="flex items-center gap-2 text-[9px] text-gray-400 uppercase font-bold tracking-tighter">
+                          <UserCheck size={10} className="text-gold-500"/> Recepção: {m.receptionDate ? new Date(m.receptionDate).toLocaleDateString('pt-BR') : '---'}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-8 py-5 text-right">
+                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
                         <button 
                           onClick={() => { setEditingId(m.id); setFormData(m); setShowModal(true); }} 
-                          className="p-2 text-navy-900 hover:bg-navy-50 rounded-xl transition-all"
-                          title="Editar Ficha"
+                          className="p-3 text-navy-900 hover:bg-white hover:shadow-lg rounded-xl transition-all border border-transparent hover:border-gray-100"
+                          title="Editar Membro"
                         >
                           <Edit2 size={18}/>
                         </button>
                         <button 
                           onClick={() => handleDelete(m.id, m.fullName)} 
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                          className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:shadow-lg rounded-xl transition-all border border-transparent hover:border-red-100"
                           title="Excluir"
                         >
                           <Trash2 size={18}/>
@@ -210,60 +212,70 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-stone-50 bg-stone-50/50 flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-serif font-bold text-navy-900">{editingId ? 'Editar Membro' : 'Novo Cadastro'}</h2>
-                <p className="text-xs text-gold-600 uppercase tracking-widest mt-1">Ficha Ministerial de Membresia</p>
+        <div className="fixed inset-0 bg-navy-900/70 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-500">
+            {/* Modal Header */}
+            <div className="p-10 border-b border-gray-100 bg-stone-50/50 flex justify-between items-center">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-navy-900 rounded-2xl flex items-center justify-center shadow-2xl rotate-3">
+                   <User size={32} className="text-gold-500" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-serif font-bold text-navy-900">{editingId ? 'Editar Registro' : 'Novo Membro IBOC'}</h2>
+                  <p className="text-xs text-gold-600 uppercase tracking-[0.3em] mt-1 font-bold">Ficha Ministerial de Membresia</p>
+                </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-3 hover:bg-white rounded-full transition-all border border-transparent hover:border-gray-100">
-                <X className="text-gray-400 hover:text-navy-900" size={24}/>
+              <button onClick={() => setShowModal(false)} className="p-4 hover:bg-white rounded-full transition-all border border-transparent hover:border-gray-200 shadow-sm">
+                <X className="text-gray-400 hover:text-navy-900" size={28}/>
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 space-y-10">
-              <div className="flex flex-col items-center">
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-10 space-y-12">
+              
+              {/* Photo Upload Section */}
+              <div className="flex flex-col items-center bg-stone-50/30 p-8 rounded-3xl border border-dashed border-stone-200">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-full bg-stone-100 border-4 border-white shadow-xl overflow-hidden ring-1 ring-gold-200">
+                  <div className="w-40 h-40 rounded-full bg-white border-8 border-white shadow-2xl overflow-hidden ring-1 ring-gold-200 transition-transform duration-500 group-hover:scale-105">
                     {formData.photoUrl ? (
                       <img src={formData.photoUrl} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <User size={48} />
+                      <div className="w-full h-full flex items-center justify-center text-gray-200">
+                        <User size={64} />
                       </div>
                     )}
                     {uploadingPhoto && (
-                      <div className="absolute inset-0 bg-navy-900/40 flex items-center justify-center">
-                        <Loader2 className="animate-spin text-white" />
+                      <div className="absolute inset-0 bg-navy-900/60 flex items-center justify-center backdrop-blur-sm">
+                        <Loader2 className="animate-spin text-white" size={32} />
                       </div>
                     )}
                   </div>
-                  <label className="absolute bottom-0 right-0 p-2.5 bg-gold-500 text-white rounded-full shadow-lg cursor-pointer hover:bg-gold-600 transition-all border-2 border-white">
-                    <Camera size={16} />
+                  <label className="absolute bottom-2 right-2 p-3.5 bg-gold-500 text-white rounded-2xl shadow-2xl cursor-pointer hover:bg-gold-600 transition-all border-4 border-white hover:scale-110 active:scale-95">
+                    <Camera size={20} />
                     <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
                   </label>
                 </div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-4 font-bold">Foto do Perfil</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-[0.4em] mt-6 font-bold">Imagem de Identificação Ministerial</p>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
-                  <User size={18} className="text-gold-500" />
-                  <h4 className="font-serif font-bold text-navy-900 text-lg">Informações Pessoais</h4>
+              {/* Grid 1: Informações Pessoais */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
+                  <div className="p-2 bg-gold-50 rounded-lg text-gold-600"><User size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Identidade & Família</h4>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   <div className="md:col-span-2">
-                    <label className={labelClass}>Nome Completo</label>
-                    <input required className={inputClass} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value.toUpperCase()})} placeholder="NOME DO MEMBRO" />
+                    <label className={labelClass}>Nome Completo do Membro</label>
+                    <input required className={inputClass} value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value.toUpperCase()})} placeholder="NOME COMPLETO" />
                   </div>
                   <div>
                     <label className={labelClass}>Data de Nascimento</label>
                     <input type="date" className={inputClass} value={formData.birthDate} onChange={e => setFormData({...formData, birthDate: e.target.value})} />
                   </div>
                   <div>
-                    <label className={labelClass}>E-mail</label>
+                    <label className={labelClass}>Email de Contato</label>
                     <input type="email" className={inputClass} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="exemplo@email.com" />
                   </div>
                   <div>
@@ -280,55 +292,31 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                       <option value="Divorciado">Divorciado(a)</option>
                     </select>
                   </div>
-                  <div className="md:col-span-1">
-                    <label className={labelClass}>Pai</label>
-                    <input className={inputClass} value={formData.fatherName} onChange={e => setFormData({...formData, fatherName: e.target.value})} placeholder="NOME DO PAI" />
+                  <div className="lg:col-span-1">
+                    <label className={labelClass}>Nome do Pai</label>
+                    <input className={inputClass} value={formData.fatherName} onChange={e => setFormData({...formData, fatherName: e.target.value})} placeholder="FILIAÇÃO PATERNA" />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Mãe</label>
-                    <input className={inputClass} value={formData.motherName} onChange={e => setFormData({...formData, motherName: e.target.value})} placeholder="NOME DA MÃE" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
-                  <Lock size={18} className="text-gold-500" />
-                  <h4 className="font-serif font-bold text-navy-900 text-lg">Credenciais de Acesso ao Site</h4>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className={labelClass}>Usuário / Login</label>
-                    <input className={inputClass} value={formData.username || ''} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="Nome de usuário" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Senha de Acesso</label>
-                    <input type="password" className={inputClass} value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Nível de Permissão</label>
-                    <select className={inputClass} value={formData.permissions || 'viewer'} onChange={e => setFormData({...formData, permissions: e.target.value as any})}>
-                      <option value="viewer">Visualizador (Membro)</option>
-                      <option value="editor">Editor (Liderança)</option>
-                      <option value="admin">Administrador (TI/Secretaria)</option>
-                    </select>
+                  <div className="lg:col-span-2">
+                    <label className={labelClass}>Nome da Mãe</label>
+                    <input className={inputClass} value={formData.motherName} onChange={e => setFormData({...formData, motherName: e.target.value})} placeholder="FILIAÇÃO MATERNA" />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
-                  <MapPin size={18} className="text-gold-500" />
-                  <h4 className="font-serif font-bold text-navy-900 text-lg">Endereço & Localização</h4>
+              {/* Grid 2: Endereço Residencial */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
+                   <div className="p-2 bg-navy-50 rounded-lg text-navy-800"><MapPin size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Endereço & Localização</h4>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="md:col-span-2">
-                    <label className={labelClass}>Logradouro (Rua, Nº)</label>
-                    <input className={inputClass} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Rua exemplo, 000" />
+                    <label className={labelClass}>Logradouro (Rua, Avenida, Número)</label>
+                    <input className={inputClass} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="RUA EXEMPRO, 123" />
                   </div>
                   <div>
                     <label className={labelClass}>Bairro</label>
-                    <input className={inputClass} value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} placeholder="Ex: Barroso" />
+                    <input className={inputClass} value={formData.neighborhood} onChange={e => setFormData({...formData, neighborhood: e.target.value})} placeholder="BARROSO" />
                   </div>
                   <div>
                     <label className={labelClass}>Cidade</label>
@@ -337,15 +325,43 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
-                  <Award size={18} className="text-gold-500" />
-                  <h4 className="font-serif font-bold text-navy-900 text-lg">Vida Eclesiástica</h4>
+              {/* Grid 3: Acesso ao Sistema - RESTAURADO */}
+              <div className="space-y-8 bg-gold-50/30 p-8 rounded-[2rem] border border-gold-100">
+                <div className="flex items-center gap-4 border-b border-gold-200/50 pb-4">
+                  <div className="p-2 bg-navy-900 rounded-lg text-gold-500 shadow-lg"><Lock size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Segurança & Acesso Digital</h4>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div>
-                    <label className={labelClass}>Status de Membresia</label>
-                    <select className={inputClass + " font-bold"} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                    <label className={labelClass}>Usuário / Login</label>
+                    <input className={inputClass + " border-gold-200"} value={formData.username || ''} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="usuario.iboc" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Senha Secreta</label>
+                    <input type="password" className={inputClass + " border-gold-200"} value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Privilégios Administrativos</label>
+                    <select className={inputClass + " border-gold-200 font-bold"} value={formData.permissions || 'viewer'} onChange={e => setFormData({...formData, permissions: e.target.value as any})}>
+                      <option value="viewer">Membro (Acesso Público)</option>
+                      <option value="editor">Líder (Editor de Conteúdo)</option>
+                      <option value="admin">Gestor (Controle Total)</option>
+                    </select>
+                  </div>
+                </div>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center mt-4">Estas credenciais permitem o acesso à Área de Líderes do site.</p>
+              </div>
+
+              {/* Grid 4: Vida Eclesiástica */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
+                   <div className="p-2 bg-gold-500 rounded-lg text-white shadow-lg"><Award size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Caminhada com Cristo</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div>
+                    <label className={labelClass}>Status Eclesiástico</label>
+                    <select className={inputClass + " font-bold border-navy-900/10"} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
                       <option value="Ativo">🟢 Ativo</option>
                       <option value="Em Observação">🟡 Em Observação</option>
                       <option value="Ausente">⚪ Ausente</option>
@@ -354,7 +370,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                     </select>
                   </div>
                   <div>
-                    <label className={labelClass}>Cargo / Função</label>
+                    <label className={labelClass}>Função Ministerial</label>
                     <select className={inputClass} value={formData.role} onChange={e => setFormData({...formData, role: e.target.value as any})}>
                       <option value="Membro">Membro</option>
                       <option value="Pastor">Pastor</option>
@@ -366,7 +382,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                     </select>
                   </div>
                   <div>
-                    <label className={labelClass}>Forma de Recepção</label>
+                    <label className={labelClass}>Tipo de Recepção</label>
                     <select className={inputClass} value={formData.receptionType} onChange={e => setFormData({...formData, receptionType: e.target.value as any})}>
                       <option value="Batismo">Batismo</option>
                       <option value="Transferência">Transferência</option>
@@ -374,30 +390,37 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                     </select>
                   </div>
                   <div>
-                    <label className={labelClass}>Data de Recepção</label>
+                    <label className={labelClass}>Data de Recepção na IBOC</label>
                     <input type="date" className={inputClass} value={formData.receptionDate} onChange={e => setFormData({...formData, receptionDate: e.target.value})} />
                   </div>
                   <div>
-                    <label className={labelClass}>Data do Batismo</label>
+                    <label className={labelClass}>Data do Batismo nas Águas</label>
                     <input type="date" className={inputClass} value={formData.baptismDate} onChange={e => setFormData({...formData, baptismDate: e.target.value})} />
                   </div>
                   <div>
-                    <label className={labelClass}>Igreja Anterior</label>
-                    <input className={inputClass} value={formData.previousChurch} onChange={e => setFormData({...formData, previousChurch: e.target.value})} placeholder="Se houver" />
+                    <label className={labelClass}>Congregação de Origem</label>
+                    <input className={inputClass} value={formData.previousChurch} onChange={e => setFormData({...formData, previousChurch: e.target.value})} placeholder="NOME DA IGREJA ANTERIOR" />
                   </div>
                   <div className="md:col-span-3">
-                    <label className={labelClass}>Dons Espirituais / Talentos</label>
-                    <textarea className={inputClass + " h-24"} value={formData.spiritualGifts} onChange={e => setFormData({...formData, spiritualGifts: e.target.value})} placeholder="Descreva os dons e talentos do membro..." />
+                    <label className={labelClass}>Dons Espirituais & Áreas de Talentos</label>
+                    <textarea className={inputClass + " h-32 resize-none shadow-inner border-gray-100"} value={formData.spiritualGifts} onChange={e => setFormData({...formData, spiritualGifts: e.target.value})} placeholder="Descreva os dons espirituais e habilidades que o membro deseja colocar à disposição do Reino..." />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-8 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-4">
-              <Button variant="outline" type="button" onClick={() => setShowModal(false)} className="px-10 rounded-xl">Descartar</Button>
-              <Button onClick={handleSave} disabled={loading} className="px-14 rounded-xl shadow-glow">
-                {loading ? <Loader2 className="animate-spin mr-2" size={18}/> : <CheckCircle2 size={18} className="mr-2"/>}
-                {editingId ? 'Atualizar Ficha' : 'Salvar Cadastro'}
+            {/* Modal Actions */}
+            <div className="p-10 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-6">
+              <button 
+                type="button" 
+                onClick={() => setShowModal(false)} 
+                className="px-12 py-4 rounded-2xl text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-white hover:text-navy-900 transition-all border border-transparent hover:border-gray-100"
+              >
+                Descartar
+              </button>
+              <Button onClick={handleSave} disabled={loading} className="px-20 py-4 rounded-2xl shadow-glow font-bold text-sm">
+                {loading ? <Loader2 className="animate-spin mr-3" size={20}/> : <CheckCircle2 size={20} className="mr-3"/>}
+                {editingId ? 'Confirmar Atualização' : 'Efetivar Cadastro'}
               </Button>
             </div>
           </div>
