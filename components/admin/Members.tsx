@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Member, AppUser } from '../../types';
 import { Button } from '../ui/Button';
-import { Edit2, Trash2, Plus, Search, Loader2, User, Camera, Shield, X, CheckCircle2, Mail, Phone, MapPin, Calendar, Heart, Award, Briefcase, Lock, UserCheck } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Loader2, User, Camera, Shield, X, CheckCircle2, Mail, Phone, MapPin, Calendar, Heart, Award, Briefcase, Lock, UserCheck, BookOpen } from 'lucide-react';
 import { getCollection, addDocument, deleteDocument, uploadImage, updateDocument } from '../../services/firestore';
 
 interface AdminMembersProps { currentUser: AppUser | null; }
@@ -144,10 +144,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                     <p className="text-gray-400 mt-6 italic tracking-widest text-xs uppercase">Sincronizando Fichas...</p>
                   </td>
                 </tr>
-              ) : members.filter(m => m.fullName.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-20 text-center text-gray-400 italic">Nenhum membro encontrado com os critérios de busca.</td>
-                </tr>
               ) : (
                 members.filter(m => m.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map(m => (
                   <tr key={m.id} className="hover:bg-stone-50/80 transition-all group">
@@ -223,7 +219,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 </div>
                 <div>
                   <h2 className="text-3xl font-serif font-bold text-navy-900">{editingId ? 'Editar Registro' : 'Novo Membro IBOC'}</h2>
-                  <p className="text-xs text-gold-600 uppercase tracking-[0.3em] mt-1 font-bold">Ficha Ministerial de Membresia</p>
+                  <p className="text-xs text-gold-600 uppercase tracking-[0.3em] mt-1 font-bold">Ficha Ministerial de Membresia Completa</p>
                 </div>
               </div>
               <button onClick={() => setShowModal(false)} className="p-4 hover:bg-white rounded-full transition-all border border-transparent hover:border-gray-200 shadow-sm">
@@ -233,6 +229,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-10 space-y-12">
+              
               {/* Photo Upload Section */}
               <div className="flex flex-col items-center bg-stone-50/30 p-8 rounded-3xl border border-dashed border-stone-200">
                 <div className="relative group">
@@ -258,7 +255,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 <p className="text-[10px] text-gray-400 uppercase tracking-[0.4em] mt-6 font-bold">Imagem de Identificação Ministerial</p>
               </div>
 
-              {/* Grid 1: Informações Pessoais */}
+              {/* Seção: Identidade & Família */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
                   <div className="p-2 bg-gold-50 rounded-lg text-gold-600"><User size={20} /></div>
@@ -294,16 +291,64 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                   </div>
                   <div className="lg:col-span-1">
                     <label className={labelClass}>Nome do Pai</label>
-                    <input className={inputClass} value={formData.fatherName} onChange={e => setFormData({...formData, fatherName: e.target.value})} placeholder="FILIAÇÃO PATERNA" />
+                    <input className={inputClass} value={formData.fatherName || ''} onChange={e => setFormData({...formData, fatherName: e.target.value})} placeholder="FILIAÇÃO PATERNA" />
                   </div>
                   <div className="lg:col-span-2">
                     <label className={labelClass}>Nome da Mãe</label>
-                    <input className={inputClass} value={formData.motherName} onChange={e => setFormData({...formData, motherName: e.target.value})} placeholder="FILIAÇÃO MATERNA" />
+                    <input className={inputClass} value={formData.motherName || ''} onChange={e => setFormData({...formData, motherName: e.target.value})} placeholder="FILIAÇÃO MATERNA" />
                   </div>
                 </div>
               </div>
 
-              {/* Vida Eclesiástica */}
+              {/* Seção: Endereço & Localização */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
+                   <div className="p-2 bg-navy-50 rounded-lg text-navy-800"><MapPin size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Endereço & Localização</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>Logradouro (Rua, Avenida, Número)</label>
+                    <input className={inputClass} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="RUA EXEMPRO, 123" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Bairro</label>
+                    <input className={inputClass} value={formData.neighborhood || ''} onChange={e => setFormData({...formData, neighborhood: e.target.value})} placeholder="BAIRRO" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Cidade</label>
+                    <input className={inputClass} value={formData.city || 'Fortaleza'} onChange={e => setFormData({...formData, city: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção: Segurança & Acesso Digital */}
+              <div className="space-y-8 bg-gold-50/30 p-8 rounded-[2rem] border border-gold-100 shadow-inner">
+                <div className="flex items-center gap-4 border-b border-gold-200/50 pb-4">
+                  <div className="p-2 bg-navy-900 rounded-lg text-gold-500 shadow-lg"><Lock size={20} /></div>
+                  <h4 className="font-serif font-bold text-navy-900 text-2xl italic">Segurança & Acesso Digital</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div>
+                    <label className={labelClass}>Usuário / Login</label>
+                    <input className={inputClass + " border-gold-200"} value={formData.username || ''} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="usuario.iboc" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Senha Secreta</label>
+                    <input type="password" className={inputClass + " border-gold-200"} value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Privilégios Administrativos</label>
+                    <select className={inputClass + " border-gold-200 font-bold"} value={formData.permissions || 'viewer'} onChange={e => setFormData({...formData, permissions: e.target.value as any})}>
+                      <option value="viewer">Membro (Acesso Público)</option>
+                      <option value="editor">Líder (Editor de Conteúdo)</option>
+                      <option value="admin">Gestor (Controle Total)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção: Caminhada com Cristo (Histórico Eclesiástico) */}
               <div className="space-y-8">
                 <div className="flex items-center gap-4 border-b border-stone-100 pb-4">
                    <div className="p-2 bg-gold-500 rounded-lg text-white shadow-lg"><Award size={20} /></div>
@@ -340,13 +385,51 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                       <option value="Superentendente">Superentendente</option>
                     </select>
                   </div>
+                  <div>
+                    <label className={labelClass}>Tipo de Recepção</label>
+                    <select className={inputClass} value={formData.receptionType} onChange={e => setFormData({...formData, receptionType: e.target.value as any})}>
+                      <option value="Batismo">Batismo</option>
+                      <option value="Transferência">Transferência</option>
+                      <option value="Aclamação">Aclamação</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Data de Recepção na IBOC</label>
+                    <input type="date" className={inputClass} value={formData.receptionDate || ''} onChange={e => setFormData({...formData, receptionDate: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Data do Batismo nas Águas</label>
+                    <input type="date" className={inputClass} value={formData.baptismDate || ''} onChange={e => setFormData({...formData, baptismDate: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Igreja de Origem</label>
+                    <input className={inputClass} value={formData.previousChurch || ''} onChange={e => setFormData({...formData, previousChurch: e.target.value})} placeholder="CONGREGAÇÃO ANTERIOR" />
+                  </div>
+                  <div className="md:col-span-3">
+                    <div className="flex items-center gap-2 mb-2">
+                       <BookOpen size={16} className="text-gold-600" />
+                       <label className={labelClass + " !mb-0"}>Dons Espirituais & Ministérios de Atuação</label>
+                    </div>
+                    <textarea 
+                       className={inputClass + " h-32 resize-none shadow-inner border-gray-100"} 
+                       value={formData.spiritualGifts || ''} 
+                       onChange={e => setFormData({...formData, spiritualGifts: e.target.value})} 
+                       placeholder="Descreva aqui os dons, habilidades e ministérios em que o membro já atua ou deseja atuar (Ex: Louvor, Kids, Som, Zeladoria...)" 
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="p-10 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-6">
-              <button type="button" onClick={() => setShowModal(false)} className="px-12 py-4 rounded-2xl text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-white transition-all">Descartar</button>
+            <div className="p-10 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-6 rounded-b-[2.5rem]">
+              <button 
+                type="button" 
+                onClick={() => setShowModal(false)} 
+                className="px-12 py-4 rounded-2xl text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-white hover:text-navy-900 transition-all border border-transparent hover:border-gray-100"
+              >
+                Descartar
+              </button>
               <Button onClick={handleSave} disabled={loading} className="px-20 py-4 rounded-2xl shadow-glow font-bold text-sm">
                 {loading ? <Loader2 className="animate-spin mr-3" size={20}/> : <CheckCircle2 size={20} className="mr-3"/>}
                 {editingId ? 'Confirmar Atualização' : 'Efetivar Cadastro'}
