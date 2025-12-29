@@ -1,3 +1,4 @@
+
 import { Member, Transaction, ChurchEvent, Sermon, SiteContent, Quote } from './types';
 
 export const MOCK_MEMBERS: Member[] = [
@@ -103,17 +104,20 @@ export const INITIAL_SITE_CONTENT: SiteContent = {
     { 
         imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070', 
         verse: "Pois eu tive fome, e vocês me deram de comer.", 
-        verseReference: "Mateus 25:35" 
+        verseReference: "Mateus 25:35",
+        registeredAt: 1700000000001
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070', 
         verse: "A fé, se não tiver as obras, é morta em si mesma.", 
-        verseReference: "Tiago 2:17" 
+        verseReference: "Tiago 2:17",
+        registeredAt: 1700000000002
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070', 
         verse: "Não amemos de palavra, mas por obra e em verdade.", 
-        verseReference: "1 João 3:18" 
+        verseReference: "1 João 3:18",
+        registeredAt: 1700000000003
     }
   ]
 };

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { SocialProject, SocialProjectItem } from '../../types';
 import { getCollection } from '../../services/firestore';
@@ -19,7 +20,6 @@ export const SocialPage: React.FC = () => {
   const [projects, setProjects] = useState<SocialProject[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Lightbox State
   const [activeGallery, setActiveGallery] = useState<{
       items: SocialProjectItem[];
       projectTitle: string;
@@ -30,9 +30,16 @@ export const SocialPage: React.FC = () => {
     const fetchProjects = async () => {
         try {
             const data = await getCollection<SocialProject>('social_projects');
-            // Organização cronológica (mais recentes primeiro)
+            // Ordenação dos projetos por data principal
             data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            setProjects(data);
+            
+            // Dentro de cada projeto, ordenar galeria por data de registro (mais recentes primeiro)
+            const processedData = data.map(project => ({
+                ...project,
+                gallery: (project.gallery || []).sort((a, b) => b.registeredAt - a.registeredAt)
+            }));
+            
+            setProjects(processedData);
         } catch (error) {
             console.error("Erro ao carregar galeria social:", error);
         } finally {
@@ -68,7 +75,6 @@ export const SocialPage: React.FC = () => {
     }) : null);
   }, [activeGallery]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!activeGallery) return;
@@ -82,6 +88,8 @@ export const SocialPage: React.FC = () => {
 
   const formatDate = (dateStr: string) => {
       const date = new Date(dateStr);
+      // Ajuste para compensar fuso horário do input
+      date.setDate(date.getDate() + 1);
       return {
           day: date.getDate(),
           month: date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase(),
@@ -109,7 +117,7 @@ export const SocialPage: React.FC = () => {
             >
                 {project.gallery.map((item, idx) => (
                     <div 
-                        key={idx}
+                        key={item.registeredAt}
                         className="min-w-[320px] md:min-w-[450px] aspect-[4/5] md:aspect-[3/4] rounded-[2.5rem] overflow-hidden snap-center relative shadow-2xl group border border-gray-100/50 cursor-pointer"
                         onClick={() => openLightbox(project, idx)}
                     >
@@ -134,7 +142,6 @@ export const SocialPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Carousel Controls */}
             <button onClick={() => scroll('left')} className="absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white shadow-2xl flex items-center justify-center text-navy-900 hover:bg-gold-500 hover:text-white transition-all opacity-0 group-hover/carousel:opacity-100 z-10 border border-gray-100">
                 <ChevronLeft size={24} />
             </button>
@@ -156,7 +163,6 @@ export const SocialPage: React.FC = () => {
 
   return (
     <div className="bg-stone-50 min-h-screen pb-60">
-        {/* Cinematic Hero */}
         <section className="relative h-[60vh] md:h-[75vh] flex items-center justify-center text-center px-4 overflow-hidden bg-navy-900">
              <div className="absolute inset-0">
                  <img 
@@ -187,7 +193,6 @@ export const SocialPage: React.FC = () => {
              </div>
         </section>
 
-        {/* Galeria de Projetos em Formato Carrossel Luxuoso */}
         <div className="container mx-auto px-6 md:px-12 -mt-32 relative z-20">
             {projects.length === 0 ? (
                 <div className="bg-white rounded-[3rem] p-40 text-center shadow-soft border border-gray-100 flex flex-col items-center">
@@ -196,18 +201,16 @@ export const SocialPage: React.FC = () => {
                 </div>
             ) : (
                 <div className="space-y-60">
-                    {projects.map((project, pIdx) => {
+                    {projects.map((project) => {
                         const dateInfo = formatDate(project.date);
                         return (
                             <div key={project.id} className="relative">
-                                {/* Timeline lateral flutuante */}
                                 <div className="hidden xl:block absolute -left-28 top-0 h-full w-[1px] bg-gradient-to-b from-gold-500/40 via-gray-200 to-transparent">
                                     <div className="sticky top-64 -left-5 w-10 h-10 rounded-full bg-navy-900 border-[6px] border-gold-500 shadow-glow flex items-center justify-center">
                                         <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></div>
                                     </div>
                                 </div>
 
-                                {/* Cabeçalho Editorial */}
                                 <RevealOnScroll>
                                     <div className="mb-20 flex flex-col lg:flex-row gap-16 items-start">
                                         <div className="flex-shrink-0 bg-white shadow-2xl rounded-[2rem] p-8 text-center border-t-8 border-gold-500 min-w-[140px] transform hover:-translate-y-3 transition-all duration-700">
@@ -232,7 +235,6 @@ export const SocialPage: React.FC = () => {
                                     </div>
                                 </RevealOnScroll>
 
-                                {/* Carrossel Horizontal de Imagens */}
                                 <RevealOnScroll delay={200}>
                                     <HorizontalCarousel project={project} />
                                 </RevealOnScroll>
@@ -243,10 +245,8 @@ export const SocialPage: React.FC = () => {
             )}
         </div>
 
-        {/* Lightbox Minimalista e Luxuoso */}
         {activeGallery && (
             <div className="fixed inset-0 bg-navy-900/98 z-[100] flex flex-col animate-in fade-in duration-700 backdrop-blur-3xl">
-                {/* Header */}
                 <div className="p-10 flex justify-between items-center z-[110] bg-gradient-to-b from-navy-900/80 to-transparent">
                     <div className="text-white">
                         <p className="text-[10px] uppercase tracking-[0.6em] font-bold text-gold-500 mb-2">Acervo IBOC Social</p>
@@ -260,7 +260,6 @@ export const SocialPage: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Main Content */}
                 <div className="flex-1 flex items-center justify-center relative">
                     <button onClick={prevImage} className="absolute left-12 p-6 rounded-full text-white/20 hover:text-gold-400 hover:bg-white/5 transition-all z-10"><ChevronLeft size={64} strokeWidth={1}/></button>
                     
@@ -277,7 +276,6 @@ export const SocialPage: React.FC = () => {
                     <button onClick={nextImage} className="absolute right-12 p-6 rounded-full text-white/20 hover:text-gold-400 hover:bg-white/5 transition-all z-10"><ChevronRight size={64} strokeWidth={1}/></button>
                 </div>
 
-                {/* Footer com Tipografia editorial */}
                 <div className="w-full p-16 text-center z-[110] bg-gradient-to-t from-navy-900 to-transparent">
                     <div className="max-w-4xl mx-auto space-y-8 animate-in slide-in-from-bottom-8 duration-1000">
                         <Quote size={32} className="text-gold-500/20 mx-auto mb-4" />
@@ -294,7 +292,6 @@ export const SocialPage: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* Indicador de progresso minimalista */}
                 <div className="absolute bottom-0 left-0 h-1.5 bg-white/10 w-full overflow-hidden">
                     <div 
                         className="h-full bg-gold-500 shadow-glow transition-all duration-1000 ease-in-out"
