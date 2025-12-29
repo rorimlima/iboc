@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Member, AppUser } from '../../types';
 import { Button } from '../ui/Button';
-import { Edit2, Trash2, Plus, Search, Loader2, User, Camera, Shield, X, CheckCircle2, Mail, Phone, MapPin, Calendar, Heart, Award, Briefcase } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Loader2, User, Camera, Shield, X, CheckCircle2, Mail, Phone, MapPin, Calendar, Heart, Award, Briefcase, Lock, UserCheck } from 'lucide-react';
 import { getCollection, addDocument, deleteDocument, uploadImage, updateDocument } from '../../services/firestore';
 
 interface AdminMembersProps { currentUser: AppUser | null; }
@@ -36,7 +36,10 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
     previousChurch: '',
     role: 'Membro',
     ministries: [],
-    spiritualGifts: ''
+    spiritualGifts: '',
+    username: '',
+    password: '',
+    permissions: 'viewer'
   };
   
   const [formData, setFormData] = useState(initialFormState);
@@ -108,7 +111,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
         </Button>
       </div>
 
-      {/* Barra de Busca e Filtros */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500" size={20} />
@@ -122,7 +124,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
         </div>
       </div>
 
-      {/* Tabela de Membros */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -208,11 +209,9 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
         </div>
       </div>
 
-      {/* Modal de Cadastro/Edição Expandido */}
       {showModal && (
         <div className="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
-            {/* Header do Modal */}
             <div className="p-8 border-b border-stone-50 bg-stone-50/50 flex justify-between items-center">
               <div>
                 <h2 className="text-2xl font-serif font-bold text-navy-900">{editingId ? 'Editar Membro' : 'Novo Cadastro'}</h2>
@@ -223,10 +222,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
               </button>
             </div>
 
-            {/* Corpo do Modal com Scroll */}
             <div className="flex-1 overflow-y-auto p-8 space-y-10">
-              
-              {/* Seção de Foto */}
               <div className="flex flex-col items-center">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-full bg-stone-100 border-4 border-white shadow-xl overflow-hidden ring-1 ring-gold-200">
@@ -251,7 +247,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-4 font-bold">Foto do Perfil</p>
               </div>
 
-              {/* Seção 1: Dados Pessoais */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
                   <User size={18} className="text-gold-500" />
@@ -296,7 +291,31 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 </div>
               </div>
 
-              {/* Seção 2: Endereço */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
+                  <Lock size={18} className="text-gold-500" />
+                  <h4 className="font-serif font-bold text-navy-900 text-lg">Credenciais de Acesso ao Site</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className={labelClass}>Usuário / Login</label>
+                    <input className={inputClass} value={formData.username || ''} onChange={e => setFormData({...formData, username: e.target.value})} placeholder="Nome de usuário" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Senha de Acesso</label>
+                    <input type="password" className={inputClass} value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Nível de Permissão</label>
+                    <select className={inputClass} value={formData.permissions || 'viewer'} onChange={e => setFormData({...formData, permissions: e.target.value as any})}>
+                      <option value="viewer">Visualizador (Membro)</option>
+                      <option value="editor">Editor (Liderança)</option>
+                      <option value="admin">Administrador (TI/Secretaria)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
                   <MapPin size={18} className="text-gold-500" />
@@ -318,7 +337,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
                 </div>
               </div>
 
-              {/* Seção 3: Dados Eclesiásticos */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-stone-100 pb-2">
                   <Award size={18} className="text-gold-500" />
@@ -375,7 +393,6 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
               </div>
             </div>
 
-            {/* Rodapé Fixo */}
             <div className="p-8 border-t border-stone-50 bg-stone-50/50 flex justify-end gap-4">
               <Button variant="outline" type="button" onClick={() => setShowModal(false)} className="px-10 rounded-xl">Descartar</Button>
               <Button onClick={handleSave} disabled={loading} className="px-14 rounded-xl shadow-glow">

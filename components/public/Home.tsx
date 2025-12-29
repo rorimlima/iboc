@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/Button';
 import { RevealOnScroll } from '../ui/RevealOnScroll';
-import { Clock, MapPin, Calendar, CalendarPlus, Youtube, Quote as QuoteIcon, Users, ChevronRight, ChevronLeft, Heart } from 'lucide-react';
+import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, Users, ChevronRight, ChevronLeft, Heart } from 'lucide-react';
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
 import { getCollection } from '../../services/firestore';
@@ -17,17 +17,14 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-        // Fetch Events
         const eventsData = await getCollection<ChurchEvent>('events');
         const now = new Date();
         const futureEvents = eventsData.filter(e => new Date(e.end) >= now);
         futureEvents.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
         setEvents(futureEvents);
 
-        // Fetch Latest Social Project directly from DB
         const projectsData = await getCollection<SocialProject>('social_projects');
         if (projectsData.length > 0) {
-            // Sort by Date Descending (Newest first)
             projectsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setLatestSocialProject(projectsData[0]);
         }
@@ -66,14 +63,13 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
   const scrollLeft = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' }); };
   const scrollRight = () => { if(scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' }); };
 
-  // Split events: First one gets the Spotlight treatment, others go to carousel
   const upcomingEvent = events.length > 0 ? events[0] : null;
   const carouselEvents = events.length > 1 ? events.slice(1) : [];
 
   return (
     <div className="flex flex-col w-full bg-stone-50">
       
-      {/* Hero Section - Elegant & Atmospheric */}
+      {/* Hero Section - Refined Animations */}
       <section className="relative min-h-[600px] md:h-[80vh] flex items-center justify-center text-center px-4 overflow-hidden">
         <div className="absolute inset-0 z-0">
            <img 
@@ -81,14 +77,13 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
              alt="Sanctuary" 
              className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-105"
            />
-           {/* Elegant Gradient Overlay - Lighter/Gold tone */}
            <div className="absolute inset-0 bg-gradient-to-b from-navy-900/40 via-navy-900/20 to-navy-900/80 mix-blend-multiply" />
            <div className="absolute inset-0 bg-black/20" />
         </div>
 
         <div className="relative z-20 max-w-4xl mx-auto space-y-8 pt-12">
           
-          <RevealOnScroll>
+          <RevealOnScroll className="transition-all duration-1000">
             <div className="inline-flex items-center justify-center gap-4">
               <div className="h-[1px] w-12 bg-white/60"></div>
               <span className="text-white/90 font-sans tracking-[0.4em] uppercase text-xs md:text-sm">Bem-vindo à IBOC</span>
@@ -96,19 +91,19 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
             </div>
           </RevealOnScroll>
           
-          <RevealOnScroll delay={200}>
+          <RevealOnScroll delay={300} className="transition-all duration-1000">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white leading-tight drop-shadow-lg">
               {content.heroTitle}
             </h1>
           </RevealOnScroll>
           
-          <RevealOnScroll delay={400}>
+          <RevealOnScroll delay={600} className="transition-all duration-1000">
             <p className="text-white/90 text-lg md:text-2xl font-light max-w-2xl mx-auto font-sans leading-relaxed">
               {content.heroSubtitle}
             </p>
           </RevealOnScroll>
           
-          <RevealOnScroll delay={600}>
+          <RevealOnScroll delay={900} className="transition-all duration-1000">
             <div className="pt-8 flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Button size="lg" variant="secondary" onClick={() => onNavigate(PageView.PUBLIC_ABOUT)} className="min-w-[180px] shadow-glow hover:scale-105 transition-transform duration-300">
                 {content.heroButtonText}
@@ -125,28 +120,27 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         </div>
       </section>
 
-      {/* Quick Info Bar - Floating & Elegant */}
-      <div className="container mx-auto px-4 relative z-30 -mt-16 mb-12">
-        <div className="bg-white rounded-xl shadow-soft grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 overflow-hidden border border-gray-50">
+      {/* Quick Info Bar - Removed YouTube/Ao Vivo Column */}
+      <div className="container mx-auto px-4 relative z-30 -mt-16 mb-12 max-w-4xl">
+        <div className="bg-white rounded-xl shadow-soft grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 overflow-hidden border border-gray-50">
             {[
-                { icon: Clock, title: "Horários", desc: "Qua & Sex 19h30 | Dom 18h", action: null },
-                { icon: MapPin, title: "Localização", desc: "Barroso, Fortaleza - CE", action: openMap },
-                { icon: Youtube, title: "Ao Vivo", desc: "Assista no YouTube", action: () => window.open(content.youtubeLiveLink, '_blank') }
+                { icon: Clock, title: "Horários de Culto", desc: "Qua & Sex 19h30 | Dom 18h", action: null },
+                { icon: MapPin, title: "Onde Estamos", desc: "R. Icaraçu, 1110 - Barroso, Fortaleza", action: openMap }
             ].map((item, idx) => (
-                <div key={idx} onClick={item.action || undefined} className={`p-8 flex items-center gap-5 hover:bg-stone-50 transition-colors group ${item.action ? 'cursor-pointer' : ''}`}>
+                <div key={idx} onClick={item.action || undefined} className={`p-8 flex items-center gap-6 hover:bg-stone-50 transition-colors group ${item.action ? 'cursor-pointer' : ''}`}>
                     <div className="text-gold-500 group-hover:scale-110 transition-transform duration-300">
-                        <item.icon size={28} strokeWidth={1.5} />
+                        <item.icon size={32} strokeWidth={1.2} />
                     </div>
                     <div>
                         <h3 className="font-serif font-bold text-xl text-navy-900 mb-1">{item.title}</h3>
-                        <p className="text-sm text-gray-500 font-light">{item.desc}</p>
+                        <p className="text-sm text-gray-500 font-light leading-relaxed">{item.desc}</p>
                     </div>
                 </div>
             ))}
         </div>
       </div>
 
-       {/* Unified Agenda Section: Spotlight + Carousel */}
+       {/* Agenda Section */}
        {events.length > 0 && (
           <section className="py-16 bg-stone-50 overflow-hidden">
              <div className="container mx-auto px-6">
@@ -157,60 +151,59 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                    <p className="text-gray-500 font-light mt-2">Participe dos nossos encontros e fortaleça sua fé.</p>
                 </div>
 
-                {/* --- SPOTLIGHT: NEXT EVENT (Design Elegante) --- */}
                 {upcomingEvent && (
-                    <div className="bg-navy-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px] mb-16 animate-fade-in-up">
-                        <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center relative">
-                            {/* Decorative Glow */}
-                            <div className="absolute top-0 left-0 p-[200px] bg-gold-500/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-                            
-                            <div className="relative z-10">
-                                <span className="text-gold-500 font-sans font-bold tracking-[0.2em] uppercase text-xs mb-4 block">
-                                    Próximo Grande Encontro
-                                </span>
-                                <h2 className="text-3xl md:text-5xl font-serif text-white mb-6 leading-tight">
-                                    {upcomingEvent.title}
-                                </h2>
-                                <p className="text-gray-300 mb-10 text-lg font-light leading-relaxed border-l-2 border-gold-500 pl-6 line-clamp-3">
-                                    {upcomingEvent.description || "Venha participar deste momento especial de comunhão e adoração."}
-                                </p>
+                    <RevealOnScroll>
+                        <div className="bg-navy-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px] mb-16">
+                            <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center relative">
+                                <div className="absolute top-0 left-0 p-[200px] bg-gold-500/10 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
                                 
-                                <div className="space-y-5 mb-10 text-white/80 font-light">
-                                    <div className="flex items-center gap-4">
-                                        <Calendar className="text-gold-500" size={20}/>
-                                        <span className="text-lg capitalize">
-                                            {new Date(upcomingEvent.start).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                        </span>
+                                <div className="relative z-10">
+                                    <span className="text-gold-500 font-sans font-bold tracking-[0.2em] uppercase text-xs mb-4 block">
+                                        Próximo Grande Encontro
+                                    </span>
+                                    <h2 className="text-3xl md:text-5xl font-serif text-white mb-6 leading-tight">
+                                        {upcomingEvent.title}
+                                    </h2>
+                                    <p className="text-gray-300 mb-10 text-lg font-light leading-relaxed border-l-2 border-gold-500 pl-6 line-clamp-3">
+                                        {upcomingEvent.description || "Venha participar deste momento especial de comunhão e adoração."}
+                                    </p>
+                                    
+                                    <div className="space-y-5 mb-10 text-white/80 font-light">
+                                        <div className="flex items-center gap-4">
+                                            <Calendar className="text-gold-500" size={20}/>
+                                            <span className="text-lg capitalize">
+                                                {new Date(upcomingEvent.start).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <Clock className="text-gold-500" size={20}/>
+                                            <span className="text-lg">
+                                                {new Date(upcomingEvent.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <MapPin className="text-gold-500" size={20}/>
+                                            <span className="text-lg">{upcomingEvent.location}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <Clock className="text-gold-500" size={20}/>
-                                        <span className="text-lg">
-                                            {new Date(upcomingEvent.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <MapPin className="text-gold-500" size={20}/>
-                                        <span className="text-lg">{upcomingEvent.location}</span>
-                                    </div>
-                                </div>
 
-                                <Button variant="secondary" onClick={() => handleAddToCalendar(upcomingEvent)} className="w-full md:w-auto text-navy-900 shadow-glow">
-                                    <CalendarPlus className="mr-2" size={18} /> Confirmar Presença
-                                </Button>
+                                    <Button variant="secondary" onClick={() => handleAddToCalendar(upcomingEvent)} className="w-full md:w-auto text-navy-900 shadow-glow">
+                                        <CalendarPlus className="mr-2" size={18} /> Confirmar Presença
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="md:w-1/2 relative min-h-[300px]">
+                                <img 
+                                    src={upcomingEvent.bannerUrl || "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"} 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-overlay md:mix-blend-normal transition-transform duration-[20s] hover:scale-105" 
+                                    alt={upcomingEvent.title} 
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent to-navy-900/90 md:to-navy-900"></div>
                             </div>
                         </div>
-                        <div className="md:w-1/2 relative min-h-[300px]">
-                            <img 
-                                src={upcomingEvent.bannerUrl || "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"} 
-                                className="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-overlay md:mix-blend-normal transition-transform duration-[20s] hover:scale-105" 
-                                alt={upcomingEvent.title} 
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent to-navy-900/90 md:to-navy-900"></div>
-                        </div>
-                    </div>
+                    </RevealOnScroll>
                 )}
 
-                {/* --- CAROUSEL: FUTURE EVENTS --- */}
                 {carouselEvents.length > 0 && (
                     <div className="relative">
                         <div className="flex justify-between items-center mb-6">
@@ -284,12 +277,10 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
           </section>
        )}
 
-       {/* Social Project Section - "Amor em Ação" (Dynamic from latest SocialProject) */}
       {latestSocialProject && (
           <section className="py-20 bg-stone-100">
              <div className="container mx-auto px-6">
                 <div className="flex flex-col lg:flex-row gap-12 items-start">
-                    {/* Text Side - Sticky on large screens */}
                     <div className="lg:w-1/3 space-y-6 text-center lg:text-left lg:sticky lg:top-24">
                         <span className="text-gold-600 font-sans font-bold tracking-[0.2em] uppercase text-xs flex items-center justify-center lg:justify-start gap-2">
                             <Heart size={14} className="fill-current"/> Projeto Social
@@ -308,7 +299,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                         </div>
                     </div>
 
-                    {/* Gallery Side - Cards with Verses from latest project */}
                     <div className="lg:w-2/3 w-full">
                         {latestSocialProject.gallery && latestSocialProject.gallery.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -353,9 +343,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
           </section>
       )}
 
-      {/* Daily Inspiration - Updated to Light Tone / Ethereal */}
       <section className="relative py-32 overflow-hidden flex items-center justify-center">
-        {/* Video Background */}
         <div className="absolute inset-0 w-full h-full z-0">
             <video 
                 autoPlay 
@@ -365,18 +353,14 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                 className="absolute w-full h-full object-cover"
                 poster="https://images.unsplash.com/photo-1505481353724-5c91dc5725f4?q=80&w=2070"
             >
-                {/* Sun shining through trees/clouds - Light source */}
                 <source src="https://cdn.coverr.co/videos/coverr-sun-shining-through-trees-in-forest-4554/1080p.mp4" type="video/mp4" />
             </video>
-            {/* Elegant Light Overlays - CHANGED to Light/White */}
             <div className="absolute inset-0 bg-stone-50/60 mix-blend-overlay"></div>
             <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px]"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white opacity-80"></div>
         </div>
 
-        {/* Content - Darker Text for Contrast against Light BG */}
         <div className="container mx-auto px-6 relative z-10">
-           {/* Glass Card - Light Version */}
            <div className="max-w-4xl mx-auto bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl p-10 md:p-16 text-center shadow-soft relative overflow-hidden group">
                 
                 <div className="mb-8 flex justify-center">
@@ -405,7 +389,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
         </div>
       </section>
 
-      {/* Ministry Call to Action - Atmospheric */}
       <section className="py-24 bg-navy-900 text-white relative overflow-hidden flex items-center justify-center">
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
          <div className="absolute top-0 right-0 p-[300px] bg-gold-600/10 rounded-full blur-[100px] transform translate-x-1/3 -translate-y-1/3"></div>
