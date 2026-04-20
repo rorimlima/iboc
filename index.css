@@ -3,29 +3,37 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
-    @apply bg-stone-50 text-gray-800 font-sans m-0 antialiased;
+    @apply bg-stone-50 text-[#1F2937] font-sans m-0 antialiased overflow-x-hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-serif tracking-tight;
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+/* Custom Effects */
+.glass-effect {
+  @apply bg-white/80 backdrop-blur-md border border-white/20;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #0A1827;
-  border-radius: 4px;
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #C5A059;
+/* Base Transitions */
+* {
+  @apply transition-colors duration-200;
 }

@@ -124,6 +124,7 @@ export const SocialPage: React.FC = () => {
                         <img 
                             src={item.imageUrl} 
                             loading="lazy"
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-125" 
                             alt={`${project.title} - ${idx}`} 
                         />

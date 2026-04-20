@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Instagram, MapPin, Phone, ShieldCheck, Mail } from 'lucide-react';
 import { PageView } from '../../types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -120,27 +121,35 @@ export const PublicLayout: React.FC<PublicLayoutProps> = ({ children, onNavigate
         </div>
 
         {/* Mobile Nav - Elegant Slide */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white/98 backdrop-blur-xl absolute w-full left-0 top-full shadow-lg z-50 animate-fade-in-up border-t border-gray-100">
-            <nav className="flex flex-col p-8 space-y-6 text-center">
-              {navLinks.map((link) => (
-                <button
-                  key={link.label}
-                  onClick={() => handleNav(link.page)}
-                  className={`text-lg font-serif ${
-                    activePage === link.page ? 'text-navy-900 font-bold italic' : 'text-gray-600'
-                  }`}
-                >
-                  {link.label}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden bg-white/98 backdrop-blur-xl absolute w-full left-0 top-full shadow-lg z-50 overflow-hidden border-t border-gray-100"
+            >
+              <nav className="flex flex-col p-8 space-y-6 text-center">
+                {navLinks.map((link) => (
+                  <button
+                    key={link.label}
+                    onClick={() => handleNav(link.page)}
+                    className={`text-lg font-serif ${
+                      activePage === link.page ? 'text-navy-900 font-bold italic' : 'text-gray-600'
+                    }`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+                <div className="w-12 h-[1px] bg-gold-500 mx-auto my-4 opacity-50"></div>
+                <button onClick={() => handleNav(PageView.LOGIN)} className="text-xs uppercase tracking-[0.2em] text-gold-600 font-bold flex items-center justify-center gap-2">
+                  <ShieldCheck size={14} /> Acesso Administrativo
                 </button>
-              ))}
-              <div className="w-12 h-[1px] bg-gold-500 mx-auto my-4 opacity-50"></div>
-              <button onClick={() => handleNav(PageView.LOGIN)} className="text-xs uppercase tracking-[0.2em] text-gold-600 font-bold flex items-center justify-center gap-2">
-                <ShieldCheck size={14} /> Acesso Administrativo
-              </button>
-            </nav>
-          </div>
-        )}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Main Content */}

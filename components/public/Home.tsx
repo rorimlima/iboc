@@ -6,6 +6,7 @@ import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
 import { getCollection } from '../../services/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HomeProps {
   onNavigate: (page: PageView) => void;
@@ -93,50 +94,74 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
     <div className="flex flex-col w-full bg-stone-50">
       
       {/* Hero Section */}
-      <section className="relative min-h-[600px] md:h-[85vh] flex items-center justify-center text-center px-4 overflow-hidden">
+      <section className="relative h-[100vh] md:h-[90vh] flex items-center justify-center text-center px-4 overflow-hidden">
         <div className="absolute inset-0 z-0">
-           <img 
+           <motion.img 
+             initial={{ scale: 1.2, opacity: 0 }}
+             animate={{ scale: 1, opacity: 1 }}
+             transition={{ duration: 2.5, ease: "easeOut" }}
              src={content.heroImageUrl || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=2073&auto=format&fit=crop"} 
              alt="Sanctuary" 
-             className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-105"
+             referrerPolicy="no-referrer"
+             className="w-full h-full object-cover"
            />
-           <div className="absolute inset-0 bg-gradient-to-b from-navy-900/40 via-navy-900/20 to-navy-900/90" />
+           <div className="absolute inset-0 bg-gradient-to-b from-navy-900/60 via-navy-900/40 to-stone-50" />
         </div>
 
-        <div className="relative z-20 max-w-4xl mx-auto space-y-8 pt-12">
-          <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <div className="relative z-20 max-w-5xl mx-auto space-y-10 px-6">
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5, duration: 1 }}
+          >
             <div className="inline-flex items-center justify-center gap-4">
-              <div className="h-[1px] w-12 bg-gold-500/50"></div>
-              <span className="text-white/90 font-sans tracking-[0.4em] uppercase text-xs md:text-sm font-medium">Igreja Batista O Caminho</span>
-              <div className="h-[1px] w-12 bg-gold-500/50"></div>
+              <div className="h-[1px] w-12 bg-gold-400"></div>
+              <span className="text-white font-sans tracking-[0.5em] uppercase text-xs md:text-sm font-bold drop-shadow-md">Igreja Batista O Caminho</span>
+              <div className="h-[1px] w-12 bg-gold-400"></div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif text-white leading-tight drop-shadow-2xl">
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.7, duration: 1 }}
+          >
+            <h1 className="text-5xl md:text-8xl lg:text-9xl font-serif text-white leading-[0.9] drop-shadow-2xl tracking-tighter">
               {content.heroTitle}
             </h1>
-          </div>
+          </motion.div>
           
-          <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
-            <p className="text-white/90 text-lg md:text-2xl font-light max-w-2xl mx-auto font-sans leading-relaxed">
-              {content.heroSubtitle}
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.9, duration: 1 }}
+          >
+            <p className="text-white/95 text-xl md:text-3xl font-light max-w-3xl mx-auto font-sans leading-relaxed drop-shadow-lg italic">
+              "{content.heroSubtitle}"
             </p>
-          </div>
+          </motion.div>
           
-          <div className="animate-fade-in-up" style={{ animationDelay: '800ms' }}>
-            <div className="pt-8 flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Button size="lg" variant="secondary" onClick={() => onNavigate(PageView.PUBLIC_ABOUT)} className="min-w-[200px] shadow-glow hover:scale-105 transition-all duration-300 rounded-xl">
+          <motion.div 
+            initial={{ y: 30, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 1.1, duration: 1 }}
+          >
+            <div className="pt-8 flex flex-col sm:flex-row gap-8 justify-center items-center">
+              <Button size="lg" variant="secondary" onClick={() => onNavigate(PageView.PUBLIC_ABOUT)} className="min-w-[240px] h-16 shadow-glow hover:scale-105 transition-all duration-300 rounded-full text-base font-bold bg-gold-500 text-navy-900 border-none">
                 {content.heroButtonText}
               </Button>
               <button 
                 onClick={() => onNavigate(PageView.PUBLIC_CONTACT)}
-                className="text-white border-b border-white/30 hover:border-gold-400 pb-1 transition-all text-sm uppercase tracking-widest hover:text-gold-400 font-medium"
+                className="text-white border-b-2 border-gold-500/50 hover:border-gold-500 pb-2 transition-all text-sm uppercase tracking-[0.3em] hover:text-gold-400 font-bold drop-shadow-md"
               >
                 Planeje sua Visita
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -209,6 +234,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                                 src={upcomingEvent.bannerUrl || "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2070&auto=format&fit=crop"} 
                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
                                 alt={upcomingEvent.title} 
+                                referrerPolicy="no-referrer"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-transparent via-navy-900/10 to-navy-900"></div>
                         </div>
@@ -231,7 +257,7 @@ export const Home: React.FC<HomeProps> = ({ onNavigate, content }) => {
                                 return (
                                     <div key={event.id} className="min-w-[300px] sm:min-w-[350px] bg-white rounded-3xl shadow-soft hover:shadow-xl transition-all duration-500 snap-center group border border-gray-100 flex flex-col h-full">
                                         <div className="relative h-56 overflow-hidden rounded-t-3xl">
-                                            <img src={event.bannerUrl || "https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=2000&auto=format&fit=crop"} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                            <img src={event.bannerUrl || "https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=2000&auto=format&fit=crop"} alt={event.title} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                             <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl text-center shadow-xl border border-gold-100/50">
                                                 <span className="block text-2xl font-serif text-navy-900 leading-none font-bold">{startDate.getDate()}</span>
                                                 <span className="block text-[10px] uppercase tracking-widest text-gold-600 mt-1 font-bold">{startDate.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()}</span>

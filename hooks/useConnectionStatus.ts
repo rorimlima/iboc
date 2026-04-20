@@ -11,7 +11,7 @@ export const useConnectionStatus = () => {
     setStatus('checking');
     try {
       const result = await testConnection();
-      setStatus('connected');
+      setStatus(result.status);
       setMessage(result.message);
     } catch (error: any) {
       setStatus('error');
