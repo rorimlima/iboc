@@ -78,7 +78,18 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
     if (!formData.fullName) return alert("O nome completo é obrigatório.");
     setLoading(true);
     try {
-      const payload = { ...formData, fullName: formData.fullName.toUpperCase() };
+      // Limpar campos de data vazios para evitar erro de formato/schema do Supabase
+      const cleanData = { ...formData };
+      const dateFields = ['birthDate', 'baptismDate', 'receptionDate', 'lastAttendance'];
+      
+      dateFields.forEach(field => {
+        if (!cleanData[field as keyof typeof cleanData]) {
+          (cleanData as any)[field] = null;
+        }
+      });
+
+      const payload = { ...cleanData, fullName: cleanData.fullName.toUpperCase() };
+      
       if (editingId) {
           await updateDocument('members', editingId, payload);
           setMembers(prev => prev.map(m => m.id === editingId ? { ...payload, id: editingId } : m));
@@ -89,7 +100,12 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
       setShowModal(false);
     } catch (e: any) { 
       console.error("Erro ao salvar:", e);
-      alert(`Erro ao salvar membro: ${e.message || "Erro desconhecido"}`); 
+      // Se o erro for "column not found", pode ser cache do Supabase ou falta da coluna no banco real
+      if (e.message?.includes("column") && e.message?.includes("not found")) {
+          alert(`Erro de Banco de Dados: A coluna '${e.message.split("'")[1]}' não foi encontrada. \n\nPor favor, execute o comando SQL de atualização no painel do Supabase.`);
+      } else {
+          alert(`Erro ao salvar membro: ${e.message || "Erro desconhecido"}`); 
+      }
     } finally { 
       setLoading(false); 
     }
