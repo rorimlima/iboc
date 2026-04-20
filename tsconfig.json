@@ -14,7 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["vite/client"]
   },
   "include": ["src", "hooks", "components", "services", "App.tsx", "index.tsx", "supabaseClient.ts", "types.ts", "data.ts"]
 }

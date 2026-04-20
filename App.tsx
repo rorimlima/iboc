@@ -150,7 +150,7 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
                 uid: data.id,
                 email: data.email,
                 type: 'member',
-                displayName: data.full_name,
+                displayName: data.fullName,
                 permissions: data.permissions || 'viewer'
             });
         }

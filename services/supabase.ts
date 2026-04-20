@@ -12,7 +12,7 @@ export const testConnection = async () => {
   };
 
   try {
-    const { data: eventsData, error: eventsError } = await supabase.from('church_events').select('*').limit(1);
+    const { data: eventsData, error: eventsError } = await supabase.from('events').select('*').limit(1);
     if (eventsError) throw eventsError;
     results.publicRead = true;
 
