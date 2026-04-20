@@ -1,5 +1,6 @@
 
 -- Supabase Schema for IBOC Project
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Members Table
 CREATE TABLE IF NOT EXISTS members (
@@ -77,6 +78,17 @@ CREATE TABLE IF NOT EXISTS events (
     bannerUrl TEXT,
     roster JSONB, 
     linkedProjectId UUID,
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Sermons Table
+CREATE TABLE IF NOT EXISTS sermons (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title TEXT NOT NULL,
+    preacher TEXT NOT NULL,
+    date DATE NOT NULL,
+    series TEXT,
+    thumbnail TEXT,
     createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
