@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SocialProject, SocialProjectItem, ChurchEvent } from '../../types';
 import { Button } from '../ui/Button';
 import { Plus, Edit2, Trash2, Heart, MapPin, Calendar, Loader2, Image as ImageIcon, X, Upload, Quote as QuoteIcon, CheckCircle2, Globe, CalendarRange } from 'lucide-react';
-import { getCollection, addDocument, updateDocument, deleteDocument, uploadImage } from '../../services/firestore';
+import { getCollection, addDocument, updateDocument, deleteDocument, uploadImage } from '../../services/supabase';
 import { SOCIAL_ACTION_VERSES } from '../../data';
 
 export const AdminSocialProjects: React.FC = () => {

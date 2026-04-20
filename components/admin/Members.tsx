@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Member, AppUser } from '../../types';
 import { Button } from '../ui/Button';
 import { Edit2, Trash2, Plus, Search, Loader2, User, Camera, Shield, X, CheckCircle2, Mail, Phone, MapPin, Calendar, Heart, Award, Briefcase, Lock, UserCheck, BookOpen } from 'lucide-react';
-import { getCollection, addDocument, deleteDocument, uploadImage, updateDocument } from '../../services/firestore';
+import { getCollection, addDocument, deleteDocument, uploadImage, updateDocument } from '../../services/supabase';
 
 interface AdminMembersProps { currentUser: AppUser | null; }
 

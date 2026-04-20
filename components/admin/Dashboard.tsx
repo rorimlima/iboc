@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 import { Users, DollarSign, CalendarCheck, Database, Wifi, CheckCircle2, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent } from '../../types';
-import { seedDatabase, getCollection } from '../../services/firestore';
+import { getCollection } from '../../services/supabase';
 import { Button } from '../ui/Button';
 import { useConnectionStatus } from '../../hooks/useConnectionStatus';
 
@@ -130,16 +130,7 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleSeed = async () => {
-    if(connectionStatus === 'error') {
-      alert("Não é possível enviar dados: Sem conexão ou permissão negada.");
-      return;
-    }
-    if(confirm("Isso adicionará dados de exemplo ao seu Firebase. Continuar?")) {
-        setSeeding(true);
-        await seedDatabase();
-        await fetchRealData(); // Refresh after seed
-        setSeeding(false);
-    }
+    alert("Função de população de dados não disponível no Supabase ainda.");
   };
 
   const formatCurrency = (val: number) => 

@@ -14,11 +14,9 @@ import { AdminSocialProjects } from './components/admin/SocialProjects';
 import { PageView, SiteContent, AppUser } from './types';
 import { INITIAL_SITE_CONTENT } from './data';
 import { Button } from './components/ui/Button';
-import { signOut, signInAnonymously } from 'firebase/auth';
-import { auth, db } from './firebaseConfig';
+import { supabase } from './supabaseClient';
 import { Loader2, Quote } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { getSiteContent } from './services/firestore';
+import { getSiteContent } from './services/supabase';
 
 const About = () => (
   <div className="py-20 bg-stone-50 min-h-[60vh]">
@@ -122,12 +120,7 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
     setLoading(true);
     setError('');
 
-    try {
-      await signInAnonymously(auth);
-    } catch (e: any) {
-         console.warn("Auth warning:", e.code);
-    }
-    
+    // Master login override
     if (username === 'rorim' && password === '1234') {
         setTimeout(() => {
             onLogin({
@@ -143,33 +136,24 @@ const Login: React.FC<{ onLogin: (user: AppUser) => void, onBack: () => void }> 
     }
 
     try {
-        const membersRef = collection(db, 'members');
-        const q = query(membersRef, where('username', '==', username));
-        const querySnapshot = await getDocs(q);
+        const { data, error: queryError } = await supabase
+            .from('members')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .single();
 
-        if (!querySnapshot.empty) {
-            let foundUser = false;
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                if (data.password === password) {
-                    foundUser = true;
-                    onLogin({
-                        uid: doc.id,
-                        email: data.email,
-                        type: 'member',
-                        displayName: data.fullName,
-                        permissions: data.permissions || 'viewer'
-                    });
-                }
+        if (queryError || !data) {
+            setError('Credenciais inválidas.');
+        } else {
+            onLogin({
+                uid: data.id,
+                email: data.email,
+                type: 'member',
+                displayName: data.full_name,
+                permissions: data.permissions || 'viewer'
             });
-
-            if (foundUser) {
-                setLoading(false);
-                return;
-            }
         }
-        
-        setError('Credenciais inválidas.');
     } catch (err: any) {
         console.error("Erro no login:", err);
         setError('Erro de conexão.');
@@ -288,7 +272,7 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await signOut(auth).catch(() => {});
+    await supabase.auth.signOut().catch(() => {});
     setUser(null);
     setCurrentPage(PageView.PUBLIC_HOME);
   };

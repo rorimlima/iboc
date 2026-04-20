@@ -5,7 +5,7 @@ import { RevealOnScroll } from '../ui/RevealOnScroll';
 import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight, ChevronLeft, Heart, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
-import { getCollection } from '../../services/firestore';
+import { getCollection } from '../../services/supabase';
 
 interface HomeProps {
   onNavigate: (page: PageView) => void;

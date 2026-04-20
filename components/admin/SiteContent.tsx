@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SiteContent, ChurchEvent, SocialProject, SocialProjectItem } from '../../types';
 import { Button } from '../ui/Button';
 import { Save, Loader2, Upload, ImageIcon, Calendar, Download, X, Plus, Heart, Trash2, MapPin, Clock, CheckCircle2 } from 'lucide-react';
-import { getSiteContent, updateSiteContent, uploadImage, getCollection } from '../../services/firestore';
+import { getSiteContent, updateSiteContent, uploadImage, getCollection } from '../../services/supabase';
 import { INITIAL_SITE_CONTENT, SOCIAL_ACTION_VERSES } from '../../data';
 
 interface AdminSiteContentProps {

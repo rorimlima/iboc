@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { testConnection } from '../services/firestore';
+import { testConnection } from '../services/supabase';
 
 export type ConnectionStatus = 'checking' | 'connected' | 'error';
 

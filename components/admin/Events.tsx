@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent, Member, RosterItem } from '../../types';
 import { Button } from '../ui/Button';
 import { Plus, Calendar, MapPin, Trash2, Loader2, Search, Edit2, Users, X, FileDown, CheckCircle2, ImageIcon, Upload, Image as ImageIconLucide } from 'lucide-react';
-import { getCollection, addDocument, deleteDocument, updateDocument, uploadImage } from '../../services/firestore';
+import { getCollection, addDocument, deleteDocument, updateDocument, uploadImage } from '../../services/supabase';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 

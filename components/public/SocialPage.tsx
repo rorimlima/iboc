@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { SocialProject, SocialProjectItem } from '../../types';
-import { getCollection } from '../../services/firestore';
+import { getCollection } from '../../services/supabase';
 import { Loader2, Calendar, MapPin, Quote, X, Maximize2, ChevronLeft, ChevronRight, Heart, Share2, ImageIcon } from 'lucide-react';
 import { RevealOnScroll } from '../ui/RevealOnScroll';
 

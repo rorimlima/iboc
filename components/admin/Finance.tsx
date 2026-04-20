@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Transaction, Member, BankAccount } from '../../types';
 import { Button } from '../ui/Button';
 import { PlusCircle, MinusCircle, Loader2, Upload, FileText, Paperclip, Wallet, Landmark, Trash2, Edit2, X, FileDown, CheckCircle2, Calendar, Search, CreditCard, QrCode } from 'lucide-react';
-import { getCollection, addDocument, uploadImage, updateDocument, deleteDocument } from '../../services/firestore';
+import { getCollection, addDocument, uploadImage, updateDocument, deleteDocument } from '../../services/supabase';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 

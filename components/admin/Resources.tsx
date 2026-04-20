@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Asset, Member, Transaction, MaintenanceRecord } from '../../types';
 import { Button } from '../ui/Button';
 import { Package, Search, Plus, Loader2, Wrench, BookOpen, Music, Tv, User, Calendar, DollarSign, CheckCircle2, History, AlertTriangle, ArrowRightLeft, Camera, Edit2, X, Calculator, Trash2 } from 'lucide-react';
-import { getCollection, addDocument, updateDocument, uploadImage, deleteDocument } from '../../services/firestore';
+import { getCollection, addDocument, updateDocument, uploadImage, deleteDocument } from '../../services/supabase';
 
 export const AdminResources: React.FC = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
