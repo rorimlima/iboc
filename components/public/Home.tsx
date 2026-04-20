@@ -6,7 +6,7 @@ import { Clock, MapPin, Calendar, CalendarPlus, Quote as QuoteIcon, ChevronRight
 import { PageView, SiteContent, ChurchEvent, SocialProject } from '../../types';
 import { INSPIRATIONAL_QUOTES } from '../../data';
 import { getCollection } from '../../services/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface HomeProps {
   onNavigate: (page: PageView) => void;

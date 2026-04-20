@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Instagram, MapPin, Phone, ShieldCheck, Mail } from 'lucide-react';
 import { PageView } from '../../types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface PublicLayoutProps {
   children: React.ReactNode;

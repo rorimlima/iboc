@@ -331,7 +331,10 @@ const App: React.FC = () => {
     );
   }
 
-  setCurrentPage(PageView.LOGIN);
+  if (!user && !isPublic) {
+    return <Login onLogin={handleLoginSuccess} onBack={() => setCurrentPage(PageView.PUBLIC_HOME)} />;
+  }
+
   return null;
 };
 
