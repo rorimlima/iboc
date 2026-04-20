@@ -87,8 +87,9 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({ currentUser }) => {
           setMembers(prev => [...prev, newM as Member].sort((a, b) => a.fullName.localeCompare(b.fullName)));
       }
       setShowModal(false);
-    } catch (e) { 
-      alert("Erro ao salvar membro."); 
+    } catch (e: any) { 
+      console.error("Erro ao salvar:", e);
+      alert(`Erro ao salvar membro: ${e.message || "Erro desconhecido"}`); 
     } finally { 
       setLoading(false); 
     }

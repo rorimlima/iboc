@@ -177,13 +177,14 @@ CREATE POLICY "Public read events" ON events FOR SELECT USING (true);
 CREATE POLICY "Public read projects" ON social_projects FOR SELECT USING (true);
 CREATE POLICY "Public read sermons" ON sermons FOR SELECT USING (true);
 
--- 2. Authenticated Access 
-CREATE POLICY "Full access for authenticated users" ON members FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON accounts FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON financial FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON events FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON sermons FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON social_projects FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON assets FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON maintenance_records FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Full access for authenticated users" ON site_content FOR ALL USING (auth.role() = 'authenticated');
+-- 2. Authenticated & Anon Access (Simplified for Custom Auth)
+-- This allows access using the public 'anon' key provided in the client
+CREATE POLICY "Allow access for everyone" ON members FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON accounts FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON financial FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON events FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON sermons FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON social_projects FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON assets FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON maintenance_records FOR ALL USING (true);
+CREATE POLICY "Allow access for everyone" ON site_content FOR ALL USING (true);

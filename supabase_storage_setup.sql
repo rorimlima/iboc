@@ -28,10 +28,10 @@ USING ( bucket_id IN (
   'highlight_banners'
 ));
 
--- 2.2 Authenticated Access (Upload/Write)
-CREATE POLICY "Authenticated Upload Access"
+-- 2.2 Public/Anon Access (Upload/Write)
+-- Removida a restrição 'TO authenticated' para permitir uploads via 'anon'
+CREATE POLICY "Public Upload Access"
 ON storage.objects FOR INSERT
-TO authenticated
 WITH CHECK ( bucket_id IN (
   'members_photos', 
   'event_banners', 
@@ -42,10 +42,9 @@ WITH CHECK ( bucket_id IN (
   'highlight_banners'
 ));
 
--- 2.3 Authenticated Access (Update)
-CREATE POLICY "Authenticated Update Access"
+-- 2.3 Public/Anon Access (Update)
+CREATE POLICY "Public Update Access"
 ON storage.objects FOR UPDATE
-TO authenticated
 USING ( bucket_id IN (
   'members_photos', 
   'event_banners', 
@@ -56,10 +55,9 @@ USING ( bucket_id IN (
   'highlight_banners'
 ));
 
--- 2.4 Authenticated Access (Delete)
-CREATE POLICY "Authenticated Delete Access"
+-- 2.4 Public/Anon Access (Delete)
+CREATE POLICY "Public Delete Access"
 ON storage.objects FOR DELETE
-TO authenticated
 USING ( bucket_id IN (
   'members_photos', 
   'event_banners', 
